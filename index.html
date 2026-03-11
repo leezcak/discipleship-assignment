@@ -13,12 +13,276 @@
     @media print {
       .no-print { display: none !important; }
       .print-only { display: block !important; }
+      body { background: #fff; }
     }
     .print-only { display: none; }
+    .print-area table { width: 100%; border-collapse: collapse; font-family: 'Apple SD Gothic Neo', sans-serif; }
+    .print-area td { border: 1px solid #000; padding: 5px 8px; font-size: 12px; vertical-align: top; }
+    .print-area .hd { background: #e8e8e8; font-weight: 700; }
+    .print-area .form-title { font-size: 15px; font-weight: 800; text-align: center; border: 2px solid #000; padding: 6px; margin-bottom: 10px; }
+    .print-area .meta { display: flex; border: 1px solid #000; margin-bottom: 10px; }
+    .print-area .meta-cell { flex: 1; padding: 4px 8px; border-right: 1px solid #000; font-size: 12px; }
+    .print-area .meta-cell:last-child { border-right: none; }
+    .print-area .meta-label { font-size: 10px; color: #555; }
+    .print-area .sec { border: 1px solid #000; margin-bottom: -1px; }
+    .print-area .sec-hd { background: #e8e8e8; font-size: 11px; font-weight: 700; padding: 3px 8px; border-bottom: 1px solid #000; }
+    .print-area .sec-body { padding: 6px 8px; font-size: 12px; min-height: 60px; white-space: pre-wrap; line-height: 1.7; }
+    .print-area .sec-body.tall { min-height: 100px; }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel" src="app.jsx"></script>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const ME = { name: "이예진", group: "삶다수", grade: "7" };
+
+const TABS = [
+  { id: "sermon_main", label: "대예배 설교노트" },
+  { id: "sermon_college", label: "대학부 설교노트" },
+  { id: "qt1", label: "큐티 1" },
+  { id: "qt2", label: "큐티 2" },
+  { id: "prayer", label: "기도일지" },
+  { id: "weekly", label: "위클리" },
+  { id: "memo", label: "암송/예습 메모" },
+];
+
+const esc = s => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const inS = { width:"100%", padding:"8px 10px", border:"1px solid #d1d5db", borderRadius:6, fontSize:13, fontFamily:"inherit", boxSizing:"border-box" };
+const taS = { ...inS, resize:"vertical" };
+
+const Field = ({ label, value, onChange, multiline, placeholder, rows=3 }) => (
+  <div style={{ marginBottom:14 }}>
+    <label style={{ display:"block", fontWeight:600, fontSize:13, color:"#374151", marginBottom:4 }}>{label}</label>
+    {multiline
+      ? <textarea value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder||""} rows={rows} style={taS} />
+      : <input type="text" value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder||""} style={inS} />
+    }
+  </div>
+);
+
+const PrintBtn = ({ onClick }) => (
+  <div style={{ marginTop:20, textAlign:"center" }}>
+    <button onClick={onClick} style={{ background:"#4f46e5", color:"#fff", border:"none", borderRadius:8, padding:"11px 28px", fontSize:14, fontWeight:700, cursor:"pointer", boxShadow:"0 2px 8px rgba(79,70,229,0.3)" }}>
+      🖨️ 이 양식 인쇄
+    </button>
+  </div>
+);
+
+const doPrint = (html, setPrinting) => {
+  setPrinting(true);
+  setTimeout(() => { window.print(); setPrinting(false); }, 150);
+};
+
+const PrintArea = ({ html }) => (
+  <div className="print-only print-area" dangerouslySetInnerHTML={{ __html: html }} />
+);
+
+// ── 설교노트 ──
+const SermonForm = ({ data, setData, label }) => {
+  const [printing, setPrinting] = useState(false);
+  const html = `
+    <div class="form-title">대학 7부 갈렙 설교 노트</div>
+    <div class="meta">
+      <div class="meta-cell"><div class="meta-label">날짜</div>${esc(data.date)}</div>
+      <div class="meta-cell"><div class="meta-label">구분</div>${esc(label)}</div>
+      <div class="meta-cell"><div class="meta-label">이름</div>${ME.name}</div>
+    </div>
+    <div class="sec"><div class="sec-hd">설교제목</div><div class="sec-body">${esc(data.title)}</div></div>
+    <div class="sec"><div class="sec-hd">설교 요약</div><div class="sec-body tall">${esc(data.summary)}</div></div>
+    <div class="sec"><div class="sec-hd">느낀점 및 은혜나눔</div><div class="sec-body tall">${esc(data.feeling)}</div></div>
+    <div class="sec"><div class="sec-hd">적용</div><div class="sec-body tall">${esc(data.apply)}</div></div>
+  `;
+  return (
+    <div>
+      {printing && <PrintArea html={html} />}
+      <Field label="날짜" value={data.date} onChange={v=>setData(p=>({...p,date:v}))} placeholder="예) 2025.03.09" />
+      <Field label="설교제목" value={data.title} onChange={v=>setData(p=>({...p,title:v}))} />
+      <Field label="설교 요약" value={data.summary} onChange={v=>setData(p=>({...p,summary:v}))} multiline />
+      <Field label="느낀점 및 은혜나눔" value={data.feeling} onChange={v=>setData(p=>({...p,feeling:v}))} multiline />
+      <Field label="적용" value={data.apply} onChange={v=>setData(p=>({...p,apply:v}))} multiline />
+      <PrintBtn onClick={() => doPrint(html, setPrinting)} />
+    </div>
+  );
+};
+
+// ── 큐티 ──
+const QTForm = ({ data, setData }) => {
+  const [printing, setPrinting] = useState(false);
+  const html = `
+    <div class="form-title">큐티 묵상 Homework</div>
+    <div class="meta">
+      <div class="meta-cell"><div class="meta-label">날짜</div>${esc(data.date)}</div>
+      <div class="meta-cell"><div class="meta-label">본문</div>${esc(data.book)}</div>
+      <div class="meta-cell"><div class="meta-label">반</div>${ME.group}</div>
+      <div class="meta-cell"><div class="meta-label">이름</div>${ME.name}</div>
+    </div>
+    <table>
+      <tr><td class="hd" style="width:90px">관찰<br/>문체구분/정리</td><td style="white-space:pre-wrap;min-height:70px">${esc(data.observation)}</td></tr>
+      <tr><td class="hd">배경적 관찰<br/>(시간·장소·등장인물)</td><td style="white-space:pre-wrap">${esc(data.background)}</td></tr>
+      <tr><td class="hd">줄거리 요약<br/>반복/대조</td><td style="white-space:pre-wrap">${esc(data.summary)}</td></tr>
+      <tr><td class="hd">하나님 관련 기록</td><td style="white-space:pre-wrap">${esc(data.god)}</td></tr>
+      <tr><td class="hd">해석 질문<br/>(2~3개+답)</td><td style="white-space:pre-wrap;min-height:80px">${esc(data.questions)}</td></tr>
+      <tr><td class="hd">핵심 메시지</td><td style="white-space:pre-wrap">${esc(data.message)}</td></tr>
+      <tr><td class="hd">느낀점/결단</td><td style="white-space:pre-wrap;min-height:80px">${esc(data.feeling)}</td></tr>
+      <tr><td class="hd">적용</td><td style="white-space:pre-wrap;min-height:80px">${esc(data.apply)}</td></tr>
+      <tr><td class="hd">하루를 돌아보며<br/>은혜 나눔</td><td style="white-space:pre-wrap">${esc(data.review)}</td></tr>
+    </table>
+  `;
+  return (
+    <div>
+      {printing && <PrintArea html={html} />}
+      <Field label="날짜" value={data.date} onChange={v=>setData(p=>({...p,date:v}))} />
+      <Field label="본문" value={data.book} onChange={v=>setData(p=>({...p,book:v}))} placeholder="예) 창세기 1:1-10" />
+      <Field label="관찰 - 문체/구분 및 정리" value={data.observation} onChange={v=>setData(p=>({...p,observation:v}))} multiline />
+      <Field label="배경적 관찰 (시간/장소/등장인물)" value={data.background} onChange={v=>setData(p=>({...p,background:v}))} multiline />
+      <Field label="줄거리 요약 / 반복·대조" value={data.summary} onChange={v=>setData(p=>({...p,summary:v}))} multiline />
+      <Field label="하나님과 관련된 기록" value={data.god} onChange={v=>setData(p=>({...p,god:v}))} multiline />
+      <Field label="해석 질문 (2~3개 + 답)" value={data.questions} onChange={v=>setData(p=>({...p,questions:v}))} multiline />
+      <Field label="핵심 메시지" value={data.message} onChange={v=>setData(p=>({...p,message:v}))} multiline />
+      <Field label="느낀점 및 결단" value={data.feeling} onChange={v=>setData(p=>({...p,feeling:v}))} multiline />
+      <Field label="적용" value={data.apply} onChange={v=>setData(p=>({...p,apply:v}))} multiline />
+      <Field label="하루를 돌아보며 (은혜 나눔)" value={data.review} onChange={v=>setData(p=>({...p,review:v}))} multiline />
+      <PrintBtn onClick={() => doPrint(html, setPrinting)} />
+    </div>
+  );
+};
+
+// ── 기도일지 ──
+const PrayerForm = ({ prayer, setPrayer }) => {
+  const [printing, setPrinting] = useState(false);
+  const html = `
+    <div class="form-title">제자훈련 코람데오 기도일지</div>
+    <div class="meta">
+      <div class="meta-cell"><div class="meta-label">제자반명</div>${ME.group}</div>
+      <div class="meta-cell"><div class="meta-label">이름</div>${ME.name}</div>
+      <div class="meta-cell"><div class="meta-label">학년</div>${ME.grade}</div>
+    </div>
+    <table>
+      <tr>
+        <td class="hd" style="text-align:center;width:70px">날짜</td>
+        <td class="hd" style="text-align:center;width:110px">시간</td>
+        <td class="hd" style="text-align:center;width:70px">장소</td>
+        <td class="hd" style="text-align:center">내용</td>
+      </tr>
+      ${prayer.map(r=>`
+        <tr>
+          <td style="text-align:center">${esc(r.date)}</td>
+          <td style="text-align:center">${esc(r.startTime)}~${esc(r.endTime)}</td>
+          <td style="text-align:center">${esc(r.place)}</td>
+          <td style="white-space:pre-wrap;min-height:60px">${esc(r.content)}</td>
+        </tr>
+      `).join("")}
+    </table>
+  `;
+  return (
+    <div>
+      {printing && <PrintArea html={html} />}
+      {prayer.map((row,i) => (
+        <div key={i} style={{ background:"#f9fafb", borderRadius:8, padding:14, marginBottom:12, border:"1px solid #e5e7eb" }}>
+          <div style={{ fontWeight:700, fontSize:13, color:"#6b7280", marginBottom:10 }}>기도 {i+1}</div>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:8 }}>
+            {[["date","날짜"],["startTime","시작"],["endTime","종료"]].map(([k,lbl])=>(
+              <div key={k}>
+                <label style={{ display:"block", fontWeight:600, fontSize:12, color:"#374151", marginBottom:3 }}>{lbl}</label>
+                <input type="text" value={row[k]} onChange={e=>setPrayer(prayer.map((r,ri)=>ri===i?{...r,[k]:e.target.value}:r))} style={{ width:"100%", padding:"6px 8px", border:"1px solid #d1d5db", borderRadius:5, fontSize:12, boxSizing:"border-box" }} />
+              </div>
+            ))}
+          </div>
+          <Field label="장소" value={row.place} onChange={v=>setPrayer(prayer.map((r,ri)=>ri===i?{...r,place:v}:r))} />
+          <Field label="내용" value={row.content} onChange={v=>setPrayer(prayer.map((r,ri)=>ri===i?{...r,content:v}:r))} multiline />
+          {prayer.length>1 && <button onClick={()=>setPrayer(prayer.filter((_,ri)=>ri!==i))} style={{ fontSize:11, color:"#ef4444", background:"none", border:"none", cursor:"pointer" }}>삭제</button>}
+        </div>
+      ))}
+      <button onClick={()=>setPrayer([...prayer,{date:"",startTime:"",endTime:"",place:"",content:""}])} style={{ fontSize:13, color:"#6366f1", background:"none", border:"1px solid #6366f1", borderRadius:6, padding:"6px 14px", cursor:"pointer", marginBottom:16 }}>+ 기도 추가</button>
+      <PrintBtn onClick={() => doPrint(html, setPrinting)} />
+    </div>
+  );
+};
+
+// ── 위클리 ──
+const WeeklyForm = ({ weekly, setWeekly }) => {
+  const [printing, setPrinting] = useState(false);
+  const html = `
+    <div class="form-title">Weekly Check List</div>
+    <div class="meta">
+      <div class="meta-cell"><div class="meta-label">이름</div>${ME.name}</div>
+      <div class="meta-cell"><div class="meta-label">기간</div>${esc(weekly.week)}</div>
+    </div>
+    <div class="sec"><div class="sec-hd">금주의 목표 (우선순위)</div><div class="sec-body">${esc(weekly.goals)}</div></div>
+    <div class="sec"><div class="sec-hd">잘한 것</div><div class="sec-body">${esc(weekly.good)}</div></div>
+    <div class="sec"><div class="sec-hd">잘하지 못한 것</div><div class="sec-body">${esc(weekly.bad)}</div></div>
+    <div class="sec"><div class="sec-hd">개선해야 할 것</div><div class="sec-body">${esc(weekly.improve)}</div></div>
+    <div class="sec"><div class="sec-hd">전도 보고 및 느낀 점</div><div class="sec-body">${esc(weekly.evangelism)}</div></div>
+  `;
+  return (
+    <div>
+      {printing && <PrintArea html={html} />}
+      <Field label="주차" value={weekly.week} onChange={v=>setWeekly(p=>({...p,week:v}))} placeholder="예) 2025.03.09 - 03.15" />
+      <Field label="금주의 목표 (우선순위)" value={weekly.goals} onChange={v=>setWeekly(p=>({...p,goals:v}))} multiline />
+      <Field label="잘한 것" value={weekly.good} onChange={v=>setWeekly(p=>({...p,good:v}))} multiline />
+      <Field label="잘하지 못한 것" value={weekly.bad} onChange={v=>setWeekly(p=>({...p,bad:v}))} multiline />
+      <Field label="개선해야 할 것" value={weekly.improve} onChange={v=>setWeekly(p=>({...p,improve:v}))} multiline />
+      <Field label="전도 보고 및 느낀 점" value={weekly.evangelism} onChange={v=>setWeekly(p=>({...p,evangelism:v}))} multiline />
+      <PrintBtn onClick={() => doPrint(html, setPrinting)} />
+    </div>
+  );
+};
+
+// ── 암송/예습 ──
+const MemoForm = ({ memo, setMemo }) => (
+  <div>
+    <div style={{ background:"#fef9c3", border:"1px solid #fde68a", borderRadius:8, padding:12, marginBottom:16, fontSize:13, color:"#92400e" }}>
+      💡 말씀 암송은 <strong>사랑의교회 앱</strong>에서, 제자반 예습은 <strong>교재</strong>에서 직접 진행. 여기선 메모만!
+    </div>
+    <Field label="말씀 암송 — 이번 주 구절 메모" value={memo.memorization} onChange={v=>setMemo(p=>({...p,memorization:v}))} multiline placeholder="암송할 3구절" />
+    <Field label="제자반 예습 — 진행 현황 / 메모" value={memo.preview} onChange={v=>setMemo(p=>({...p,preview:v}))} multiline placeholder="예습 메모" />
+  </div>
+);
+
+function App() {
+  const [tab, setTab] = useState("sermon_main");
+  const [sermonMain, setSermonMain] = useState({ date:"", title:"", summary:"", feeling:"", apply:"" });
+  const [sermonCollege, setSermonCollege] = useState({ date:"", title:"", summary:"", feeling:"", apply:"" });
+  const [qt1, setQt1] = useState({ date:"", book:"", observation:"", background:"", summary:"", god:"", questions:"", message:"", feeling:"", apply:"", review:"" });
+  const [qt2, setQt2] = useState({ date:"", book:"", observation:"", background:"", summary:"", god:"", questions:"", message:"", feeling:"", apply:"", review:"" });
+  const [prayer, setPrayer] = useState([{ date:"", startTime:"", endTime:"", place:"", content:"" }]);
+  const [weekly, setWeekly] = useState({ week:"", goals:"", good:"", bad:"", improve:"", evangelism:"" });
+  const [memo, setMemo] = useState({ memorization:"", preview:"" });
+
+  const renderTab = () => {
+    if (tab==="sermon_main") return <SermonForm data={sermonMain} setData={setSermonMain} label="주일대예배" />;
+    if (tab==="sermon_college") return <SermonForm data={sermonCollege} setData={setSermonCollege} label="대학부예배" />;
+    if (tab==="qt1") return <QTForm data={qt1} setData={setQt1} />;
+    if (tab==="qt2") return <QTForm data={qt2} setData={setQt2} />;
+    if (tab==="prayer") return <PrayerForm prayer={prayer} setPrayer={setPrayer} />;
+    if (tab==="weekly") return <WeeklyForm weekly={weekly} setWeekly={setWeekly} />;
+    if (tab==="memo") return <MemoForm memo={memo} setMemo={setMemo} />;
+  };
+
+  return (
+    <div className="no-print" style={{ minHeight:"100vh", background:"#f3f4f6" }}>
+      <div style={{ maxWidth:720, margin:"0 auto", padding:"24px 16px" }}>
+        <div style={{ marginBottom:20, textAlign:"center" }}>
+          <h1 style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", margin:0 }}>제자훈련 주간 과제</h1>
+          <p style={{ fontSize:12, color:"#6b7280", marginTop:4 }}>이예진 · 삶다수 · 7학년 &nbsp;|&nbsp; 매주 수요일 PM 7:30 제출</p>
+        </div>
+        <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:20 }}>
+          {TABS.map(t=>(
+            <button key={t.id} onClick={()=>setTab(t.id)} style={{ fontSize:12, padding:"6px 12px", borderRadius:20, border:"none", cursor:"pointer", background:tab===t.id?"#4f46e5":"#e5e7eb", color:tab===t.id?"#fff":"#374151", fontWeight:tab===t.id?700:400 }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div style={{ background:"#fff", borderRadius:12, padding:20, boxShadow:"0 1px 4px rgba(0,0,0,0.08)" }}>
+          {renderTab()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
 </body>
 </html>
