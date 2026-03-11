@@ -263,19 +263,17 @@ const WeeklyForm = ({ weekly, setWeekly }) => {
     </div>
     <table style="margin-bottom:6px;font-size:9px;">
       <tr>
-        <th style="background:#d9d9d9;width:28px;text-align:center">시간</th>
-        ${DAYS.map(d=>`<th style="background:#d9d9d9;text-align:center">${d}</th>`).join('')}
-        <th style="background:#d9d9d9;text-align:center;width:80px">금주의 목표<br/>(우선순위)</th>
+        <th style="background:#d9d9d9;width:28px;text-align:center" rowspan="2">시간</th>
+        ${DAYS.map(d=>`<th style="background:#d9d9d9;text-align:center" colspan="2">${d}</th>`).join('')}
+        <th style="background:#d9d9d9;text-align:center;width:80px" rowspan="${HOURS.length + 2}">금주의 목표<br/>(우선순위)<br/><br/><span style="font-weight:400;white-space:pre-wrap">${esc(weekly.goals)}</span></th>
       </tr>
       <tr>
-        <td style="background:#f5f5f5;text-align:center;font-size:8px;white-space:nowrap">${HOURS[0]}</td>
-        ${DAYS.map(()=>`<td style="height:14px"></td>`).join('')}
-        <td rowspan="${HOURS.length}" style="vertical-align:top;font-size:9px;padding:4px;white-space:pre-wrap">${esc(weekly.goals)}</td>
+        ${DAYS.map(()=>`<th style="background:#efefef;text-align:center;font-size:8px;font-weight:400">계획</th><th style="background:#efefef;text-align:center;font-size:8px;font-weight:400">실제</th>`).join('')}
       </tr>
-      ${HOURS.slice(1).map(h=>`
+      ${HOURS.map(h=>`
         <tr>
           <td style="background:#f5f5f5;text-align:center;font-size:8px;white-space:nowrap">${h}</td>
-          ${DAYS.map(()=>`<td style="height:14px"></td>`).join('')}
+          ${DAYS.map(()=>`<td style="height:14px"></td><td style="height:14px;background:#fafafa"></td>`).join('')}
         </tr>
       `).join('')}
     </table>
