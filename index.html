@@ -11,21 +11,31 @@
     * { box-sizing: border-box; }
     body { margin: 0; font-family: 'Apple SD Gothic Neo', sans-serif; background: #f3f4f6; }
     #print-root { display: none; }
+
     @media print {
+      @page { margin: 15mm; size: A4; }
       body > #root { display: none; }
-      #print-root { display: block; }
-      .print-area table { width: 100%; border-collapse: collapse; }
-      .print-area td { border: 1px solid #000; padding: 5px 8px; font-size: 12px; vertical-align: top; }
-      .print-area .hd { background: #e8e8e8; font-weight: 700; }
-      .print-area .form-title { font-size: 15px; font-weight: 800; text-align: center; border: 2px solid #000; padding: 6px; margin-bottom: 10px; }
-      .print-area .meta { display: flex; border: 1px solid #000; margin-bottom: 10px; }
-      .print-area .meta-cell { flex: 1; padding: 4px 8px; border-right: 1px solid #000; font-size: 12px; }
-      .print-area .meta-cell:last-child { border-right: none; }
-      .print-area .meta-label { font-size: 10px; color: #555; }
-      .print-area .sec { border: 1px solid #000; margin-bottom: -1px; }
-      .print-area .sec-hd { background: #e8e8e8; font-size: 11px; font-weight: 700; padding: 3px 8px; border-bottom: 1px solid #000; }
-      .print-area .sec-body { padding: 6px 8px; font-size: 12px; min-height: 60px; white-space: pre-wrap; line-height: 1.7; }
-      .print-area .sec-body.tall { min-height: 100px; }
+      #print-root { display: block; font-family: 'Apple SD Gothic Neo', sans-serif; }
+
+      /* 헤더/푸터 제거 */
+      html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      .pa table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+      .pa td, .pa th { border: 1px solid #000; padding: 4px 6px; font-size: 11px; vertical-align: top; word-break: keep-all; }
+      .pa th { background: #d9d9d9; font-weight: 700; text-align: center; }
+
+      /* 공통 */
+      .pa .doc-title { font-size: 14px; font-weight: 800; text-align: center; border: 2px solid #000; padding: 5px; margin-bottom: 8px; }
+      .pa .meta-row { display: flex; border: 1px solid #000; margin-bottom: 8px; font-size: 11px; }
+      .pa .meta-cell { flex: 1; padding: 3px 6px; border-right: 1px solid #000; }
+      .pa .meta-cell:last-child { border-right: none; }
+      .pa .meta-label { font-size: 9px; color: #555; }
+      .pa .content-area { white-space: pre-wrap; min-height: 50px; line-height: 1.6; font-size: 11px; }
+      .pa .content-area.tall { min-height: 80px; }
+      .pa .content-area.xtall { min-height: 120px; }
+      .pa .row-label { background: #d9d9d9; font-weight: 700; font-size: 10px; text-align: center; width: 70px; vertical-align: middle; }
+      .pa .sub-label { font-size: 9px; color: #444; font-weight: 400; }
+      .pa .note { font-size: 9px; color: #555; font-style: italic; }
     }
   </style>
 </head>
@@ -50,7 +60,7 @@ const taS = { ...inS, resize:"vertical" };
 
 const doPrint = (html) => {
   const root = document.getElementById('print-root');
-  root.innerHTML = `<div class="print-area">${html}</div>`;
+  root.innerHTML = `<div class="pa">${html}</div>`;
   window.print();
   root.innerHTML = '';
 };
@@ -73,18 +83,21 @@ const PrintBtn = ({ onClick }) => (
   </div>
 );
 
+// ── 설교노트 ──
 const SermonForm = ({ data, setData, label }) => {
   const getHTML = () => `
-    <div class="form-title">대학 7부 갈렙 설교 노트</div>
-    <div class="meta">
-      <div class="meta-cell"><div class="meta-label">날짜</div>${esc(data.date)}</div>
-      <div class="meta-cell"><div class="meta-label">구분</div>${esc(label)}</div>
-      <div class="meta-cell"><div class="meta-label">이름</div>${ME.name}</div>
+    <div class="doc-title">대학 7부 갈렙 설교 노트</div>
+    <div style="display:flex; border:1px solid #000; margin-bottom:8px; font-size:11px;">
+      <div style="flex:1; padding:3px 6px; border-right:1px solid #000;"><div style="font-size:9px;color:#555">날짜</div>${esc(data.date)}</div>
+      <div style="flex:1; padding:3px 6px; border-right:1px solid #000;"><div style="font-size:9px;color:#555">구분</div>${esc(label)}</div>
+      <div style="flex:1; padding:3px 6px;"><div style="font-size:9px;color:#555">이름</div>${ME.name}</div>
     </div>
-    <div class="sec"><div class="sec-hd">설교제목</div><div class="sec-body">${esc(data.title)}</div></div>
-    <div class="sec"><div class="sec-hd">설교 요약</div><div class="sec-body tall">${esc(data.summary)}</div></div>
-    <div class="sec"><div class="sec-hd">느낀점 및 은혜나눔</div><div class="sec-body tall">${esc(data.feeling)}</div></div>
-    <div class="sec"><div class="sec-hd">적용</div><div class="sec-body tall">${esc(data.apply)}</div></div>
+    <table>
+      <tr><th style="width:70px;background:#d9d9d9">설교제목</th><td class="content-area">${esc(data.title)}</td></tr>
+      <tr><th style="background:#d9d9d9">설교<br/>요약</th><td class="content-area xtall">${esc(data.summary)}</td></tr>
+      <tr><th style="background:#d9d9d9">느낀점<br/><span style="font-size:9px;font-weight:400">(은혜나눔)</span></th><td class="content-area xtall">${esc(data.feeling)}</td></tr>
+      <tr><th style="background:#d9d9d9">적용</th><td class="content-area xtall">${esc(data.apply)}</td></tr>
+    </table>
   `;
   return (
     <div>
@@ -98,25 +111,62 @@ const SermonForm = ({ data, setData, label }) => {
   );
 };
 
+// ── 큐티 (원본 2단 레이아웃) ──
 const QTForm = ({ data, setData }) => {
   const getHTML = () => `
-    <div class="form-title">큐티 묵상 Homework</div>
-    <div class="meta">
-      <div class="meta-cell"><div class="meta-label">날짜</div>${esc(data.date)}</div>
-      <div class="meta-cell"><div class="meta-label">본문</div>${esc(data.book)}</div>
-      <div class="meta-cell"><div class="meta-label">반</div>${ME.group}</div>
-      <div class="meta-cell"><div class="meta-label">이름</div>${ME.name}</div>
+    <div class="doc-title">큐티 묵상 Homework</div>
+    <div style="display:flex; border:1px solid #000; margin-bottom:8px; font-size:11px;">
+      <div style="flex:1;padding:3px 6px;border-right:1px solid #000;"><div style="font-size:9px;color:#555">날짜 :</div>${esc(data.date)}</div>
+      <div style="flex:1;padding:3px 6px;border-right:1px solid #000;"><div style="font-size:9px;color:#555">본문 :</div>${esc(data.book)}</div>
+      <div style="flex:1;padding:3px 6px;border-right:1px solid #000;"><div style="font-size:9px;color:#555">반 :</div>${ME.group}</div>
+      <div style="flex:1;padding:3px 6px;"><div style="font-size:9px;color:#555">이름 :</div>${ME.name}</div>
     </div>
     <table>
-      <tr><td class="hd" style="width:90px">관찰<br/>문체구분/정리</td><td style="white-space:pre-wrap;min-height:70px">${esc(data.observation)}</td></tr>
-      <tr><td class="hd">배경적 관찰<br/>(시간·장소·등장인물)</td><td style="white-space:pre-wrap">${esc(data.background)}</td></tr>
-      <tr><td class="hd">줄거리 요약<br/>반복/대조</td><td style="white-space:pre-wrap">${esc(data.summary)}</td></tr>
-      <tr><td class="hd">하나님 관련 기록</td><td style="white-space:pre-wrap">${esc(data.god)}</td></tr>
-      <tr><td class="hd">해석 질문<br/>(2~3개+답)</td><td style="white-space:pre-wrap;min-height:80px">${esc(data.questions)}</td></tr>
-      <tr><td class="hd">핵심 메시지</td><td style="white-space:pre-wrap">${esc(data.message)}</td></tr>
-      <tr><td class="hd">느낀점/결단</td><td style="white-space:pre-wrap;min-height:80px">${esc(data.feeling)}</td></tr>
-      <tr><td class="hd">적용</td><td style="white-space:pre-wrap;min-height:80px">${esc(data.apply)}</td></tr>
-      <tr><td class="hd">하루를 돌아보며<br/>은혜 나눔</td><td style="white-space:pre-wrap">${esc(data.review)}</td></tr>
+      <tr>
+        <td rowspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;width:55px;vertical-align:middle">관찰</td>
+        <td style="background:#d9d9d9;font-weight:700;font-size:10px;width:80px;vertical-align:top">문체<br/>구분 및 정리</td>
+        <td class="content-area tall">${esc(data.observation)}</td>
+        <td style="background:#d9d9d9;font-weight:700;font-size:10px;width:70px;text-align:center;vertical-align:top">
+          하나님과<br/>관련된<br/>기록<br/><span style="font-size:8px;font-weight:400">(행적 or<br/>하신말씀<br/>or 은혜)</span>
+        </td>
+        <td class="content-area tall" rowspan="2">${esc(data.god)}</td>
+      </tr>
+      <tr>
+        <td style="background:#d9d9d9;font-weight:700;font-size:10px;vertical-align:top">줄거리 요약<br/>or 반복/대조<br/>찾기 (강조)</td>
+        <td class="content-area tall">${esc(data.summary)}</td>
+        <td style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:top">
+          배경적<br/>관찰<br/><span style="font-size:8px;font-weight:400">(장소 &<br/>시간 &<br/>등장인물)</span>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:middle">해석</td>
+        <td colspan="3">
+          <div style="font-size:9px;color:#555;margin-bottom:4px">※ 2~3개의 질문과 답을 통해 말씀의 의미와 핵심 메시지 찾기</div>
+          <div class="content-area tall">${esc(data.questions)}</div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:middle">핵심<br/>메시지</td>
+        <td colspan="3" class="content-area">${esc(data.message)}</td>
+      </tr>
+      <tr>
+        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:middle">느낀점<br/>(결단)</td>
+        <td colspan="3" class="content-area tall">${esc(data.feeling)}</td>
+      </tr>
+      <tr>
+        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:middle">적용</td>
+        <td colspan="3">
+          <div style="font-size:9px;color:#555;margin-bottom:4px">※ 결단을 구체적으로 실천할 수 있는 창의적인 방법을 생각해서 적용을 부탁드립니다</div>
+          <div class="content-area tall">${esc(data.apply)}</div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:middle">하루를<br/>돌아보며<br/>(은혜나눔)</td>
+        <td colspan="3">
+          <div style="font-size:9px;color:#555;margin-bottom:4px">※ 오늘 묵상한 큐티에 비추어 하루를 돌아보며 나눔을 부탁합니다</div>
+          <div class="content-area tall">${esc(data.review)}</div>
+        </td>
+      </tr>
     </table>
   `;
   return (
@@ -124,9 +174,9 @@ const QTForm = ({ data, setData }) => {
       <Field label="날짜" value={data.date} onChange={v=>setData(p=>({...p,date:v}))} />
       <Field label="본문" value={data.book} onChange={v=>setData(p=>({...p,book:v}))} placeholder="예) 창세기 1:1-10" />
       <Field label="관찰 - 문체/구분 및 정리" value={data.observation} onChange={v=>setData(p=>({...p,observation:v}))} multiline />
-      <Field label="배경적 관찰 (시간/장소/등장인물)" value={data.background} onChange={v=>setData(p=>({...p,background:v}))} multiline />
-      <Field label="줄거리 요약 / 반복·대조" value={data.summary} onChange={v=>setData(p=>({...p,summary:v}))} multiline />
+      <Field label="줄거리 요약 / 반복·대조 (강조)" value={data.summary} onChange={v=>setData(p=>({...p,summary:v}))} multiline />
       <Field label="하나님과 관련된 기록" value={data.god} onChange={v=>setData(p=>({...p,god:v}))} multiline />
+      <Field label="배경적 관찰 (시간/장소/등장인물)" value={data.background} onChange={v=>setData(p=>({...p,background:v}))} multiline />
       <Field label="해석 질문 (2~3개 + 답)" value={data.questions} onChange={v=>setData(p=>({...p,questions:v}))} multiline />
       <Field label="핵심 메시지" value={data.message} onChange={v=>setData(p=>({...p,message:v}))} multiline />
       <Field label="느낀점 및 결단" value={data.feeling} onChange={v=>setData(p=>({...p,feeling:v}))} multiline />
@@ -137,29 +187,37 @@ const QTForm = ({ data, setData }) => {
   );
 };
 
+// ── 기도일지 (원본: 날짜/시간/장소/내용 4컬럼, 7행) ──
 const PrayerForm = ({ prayer, setPrayer }) => {
   const getHTML = () => `
-    <div class="form-title">제자훈련 코람데오 기도일지</div>
-    <div class="meta">
-      <div class="meta-cell"><div class="meta-label">제자반명</div>${ME.group}</div>
-      <div class="meta-cell"><div class="meta-label">이름</div>${ME.name}</div>
-      <div class="meta-cell"><div class="meta-label">학년</div>${ME.grade}</div>
+    <div class="doc-title">제자훈련 코람데오 기도일지</div>
+    <div style="font-size:11px; margin-bottom:8px;">
+      제자반명 <u style="display:inline-block;min-width:80px">${ME.group}</u>
+      &nbsp;&nbsp; 이름 <u style="display:inline-block;min-width:80px">${ME.name}</u>
+      &nbsp;&nbsp; 학년 <u style="display:inline-block;min-width:40px">${ME.grade}</u>
     </div>
     <table>
       <tr>
-        <td class="hd" style="text-align:center;width:70px">날짜</td>
-        <td class="hd" style="text-align:center;width:110px">시간</td>
-        <td class="hd" style="text-align:center;width:70px">장소</td>
-        <td class="hd" style="text-align:center">내용</td>
+        <th style="width:55px;text-align:center">날짜</th>
+        <th style="width:80px;text-align:center">시간</th>
+        <th style="width:55px;text-align:center">장소</th>
+        <th style="text-align:center">내용</th>
       </tr>
-      ${prayer.map(r=>`
+      ${prayer.map(r => `
         <tr>
-          <td style="text-align:center">${esc(r.date)}</td>
-          <td style="text-align:center">${esc(r.startTime)}~${esc(r.endTime)}</td>
-          <td style="text-align:center">${esc(r.place)}</td>
-          <td style="white-space:pre-wrap;min-height:60px">${esc(r.content)}</td>
+          <td style="text-align:center;font-size:11px">${esc(r.date)}</td>
+          <td style="text-align:center;font-size:11px">
+            ${esc(r.startTime)}<br/>~<br/>${esc(r.endTime)}
+          </td>
+          <td style="text-align:center;font-size:11px">${esc(r.place)}</td>
+          <td style="white-space:pre-wrap;min-height:80px;font-size:11px">${esc(r.content)}</td>
         </tr>
-      `).join("")}
+      `).join('')}
+      ${Array(Math.max(0, 7 - prayer.length)).fill(`
+        <tr>
+          <td style="height:80px"></td><td></td><td></td><td></td>
+        </tr>
+      `).join('')}
     </table>
   `;
   return (
@@ -168,7 +226,7 @@ const PrayerForm = ({ prayer, setPrayer }) => {
         <div key={i} style={{ background:"#f9fafb", borderRadius:8, padding:14, marginBottom:12, border:"1px solid #e5e7eb" }}>
           <div style={{ fontWeight:700, fontSize:13, color:"#6b7280", marginBottom:10 }}>기도 {i+1}</div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:8 }}>
-            {[["date","날짜"],["startTime","시작"],["endTime","종료"]].map(([k,lbl])=>(
+            {[["date","날짜"],["startTime","시작 시간"],["endTime","종료 시간"]].map(([k,lbl])=>(
               <div key={k}>
                 <label style={{ display:"block", fontWeight:600, fontSize:12, color:"#374151", marginBottom:3 }}>{lbl}</label>
                 <input type="text" value={row[k]} onChange={e=>setPrayer(prayer.map((r,ri)=>ri===i?{...r,[k]:e.target.value}:r))} style={{ width:"100%", padding:"6px 8px", border:"1px solid #d1d5db", borderRadius:5, fontSize:12, boxSizing:"border-box" }} />
@@ -186,18 +244,35 @@ const PrayerForm = ({ prayer, setPrayer }) => {
   );
 };
 
+// ── 위클리 ──
 const WeeklyForm = ({ weekly, setWeekly }) => {
   const getHTML = () => `
-    <div class="form-title">Weekly Check List</div>
-    <div class="meta">
-      <div class="meta-cell"><div class="meta-label">이름</div>${ME.name}</div>
-      <div class="meta-cell"><div class="meta-label">기간</div>${esc(weekly.week)}</div>
+    <div class="doc-title">Weekly Check List</div>
+    <div style="font-size:11px;border:1px solid #000;padding:3px 6px;margin-bottom:8px;">
+      이름 : ${ME.name} &nbsp;&nbsp;&nbsp; 기간 : ${esc(weekly.week)}
     </div>
-    <div class="sec"><div class="sec-hd">금주의 목표 (우선순위)</div><div class="sec-body">${esc(weekly.goals)}</div></div>
-    <div class="sec"><div class="sec-hd">잘한 것</div><div class="sec-body">${esc(weekly.good)}</div></div>
-    <div class="sec"><div class="sec-hd">잘하지 못한 것</div><div class="sec-body">${esc(weekly.bad)}</div></div>
-    <div class="sec"><div class="sec-hd">개선해야 할 것</div><div class="sec-body">${esc(weekly.improve)}</div></div>
-    <div class="sec"><div class="sec-hd">전도 보고 및 느낀 점</div><div class="sec-body">${esc(weekly.evangelism)}</div></div>
+    <table>
+      <tr>
+        <th style="width:80px;background:#d9d9d9;text-align:center">금주의 목표<br/>(우선순위)</th>
+        <td class="content-area tall">${esc(weekly.goals)}</td>
+      </tr>
+      <tr>
+        <th style="background:#d9d9d9;text-align:center">한 주를<br/>돌아보며<br/><br/>잘한 것</th>
+        <td class="content-area">${esc(weekly.good)}</td>
+      </tr>
+      <tr>
+        <th style="background:#d9d9d9;text-align:center">잘하지<br/>못한 것</th>
+        <td class="content-area">${esc(weekly.bad)}</td>
+      </tr>
+      <tr>
+        <th style="background:#d9d9d9;text-align:center">개선해야<br/>할 것</th>
+        <td class="content-area">${esc(weekly.improve)}</td>
+      </tr>
+      <tr>
+        <th style="background:#d9d9d9;text-align:center">전도 보고<br/>및 느낀 점</th>
+        <td class="content-area tall">${esc(weekly.evangelism)}</td>
+      </tr>
+    </table>
   `;
   return (
     <div>
@@ -212,6 +287,7 @@ const WeeklyForm = ({ weekly, setWeekly }) => {
   );
 };
 
+// ── 암송/예습 ──
 const MemoForm = ({ memo, setMemo }) => (
   <div>
     <div style={{ background:"#fef9c3", border:"1px solid #fde68a", borderRadius:8, padding:12, marginBottom:16, fontSize:13, color:"#92400e" }}>
@@ -226,8 +302,8 @@ function App() {
   const [tab, setTab] = useState("sermon_main");
   const [sermonMain, setSermonMain] = useState({ date:"", title:"", summary:"", feeling:"", apply:"" });
   const [sermonCollege, setSermonCollege] = useState({ date:"", title:"", summary:"", feeling:"", apply:"" });
-  const [qt1, setQt1] = useState({ date:"", book:"", observation:"", background:"", summary:"", god:"", questions:"", message:"", feeling:"", apply:"", review:"" });
-  const [qt2, setQt2] = useState({ date:"", book:"", observation:"", background:"", summary:"", god:"", questions:"", message:"", feeling:"", apply:"", review:"" });
+  const [qt1, setQt1] = useState({ date:"", book:"", observation:"", summary:"", god:"", background:"", questions:"", message:"", feeling:"", apply:"", review:"" });
+  const [qt2, setQt2] = useState({ date:"", book:"", observation:"", summary:"", god:"", background:"", questions:"", message:"", feeling:"", apply:"", review:"" });
   const [prayer, setPrayer] = useState([{ date:"", startTime:"", endTime:"", place:"", content:"" }]);
   const [weekly, setWeekly] = useState({ week:"", goals:"", good:"", bad:"", improve:"", evangelism:"" });
   const [memo, setMemo] = useState({ memorization:"", preview:"" });
