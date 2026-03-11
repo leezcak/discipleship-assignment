@@ -1,368 +1,142 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>제자훈련 주간 과제</title>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Apple SD Gothic Neo', sans-serif; background: #f3f4f6; }
-    #print-root { display: none; }
-
-    @media print {
-      @page { margin: 15mm; size: A4; }
-      body > #root { display: none; }
-      #print-root { display: block; font-family: 'Apple SD Gothic Neo', sans-serif; }
-
-      /* 헤더/푸터 제거 */
-      html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
-      .pa table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-      .pa td, .pa th { border: 1px solid #000; padding: 4px 6px; font-size: 11px; vertical-align: top; word-break: keep-all; }
-      .pa th { background: #d9d9d9; font-weight: 700; text-align: center; }
-
-      /* 공통 */
-      .pa .doc-title { font-size: 14px; font-weight: 800; text-align: center; border: 2px solid #000; padding: 5px; margin-bottom: 8px; }
-      .pa .meta-row { display: flex; border: 1px solid #000; margin-bottom: 8px; font-size: 11px; }
-      .pa .meta-cell { flex: 1; padding: 3px 6px; border-right: 1px solid #000; }
-      .pa .meta-cell:last-child { border-right: none; }
-      .pa .meta-label { font-size: 9px; color: #555; }
-      .pa .content-area { white-space: pre-wrap; height: 60px; line-height: 1.6; font-size: 11px; overflow: visible; }
-      .pa .content-area.tall { height: 90px; }
-      .pa .content-area.xtall { height: 130px; }
-      .pa .content-area.fixed-sm { height: 40px; }
-      /* 큐티 각 행 고정 높이 */
-      .pa tr.row-obs td, .pa tr.row-obs th { height: 80px; }
-      .pa tr.row-sum td, .pa tr.row-sum th { height: 80px; }
-      .pa tr.row-interp td, .pa tr.row-interp th { height: 100px; }
-      .pa tr.row-msg td, .pa tr.row-msg th { height: 50px; }
-      .pa tr.row-feel td, .pa tr.row-feel th { height: 80px; }
-      .pa tr.row-apply td, .pa tr.row-apply th { height: 100px; }
-      .pa tr.row-review td, .pa tr.row-review th { height: 100px; }
-      .pa .row-label { background: #d9d9d9; font-weight: 700; font-size: 10px; text-align: center; width: 70px; vertical-align: middle; }
-      .pa .sub-label { font-size: 9px; color: #444; font-weight: 400; }
-      .pa .note { font-size: 9px; color: #555; font-style: italic; }
-    }
-  </style>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Malgun Gothic', sans-serif; font-size: 11px; padding: 16px; background: #fff; }
+  h2 { text-align: center; font-size: 14px; padding: 8px; border: 1px solid #000; margin-bottom: 4px; }
+  .meta { border: 1px solid #000; padding: 5px 8px; margin-bottom: 6px; font-size: 11px; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  th, td { border: 1px solid #999; text-align: center; vertical-align: middle; padding: 2px 1px; font-size: 10px; }
+  /* 시간 열 */
+  .col-time { width: 36px; }
+  /* 요일 그룹 헤더 */
+  .day-header { background: #e8e8e8; font-weight: bold; font-size: 10px; }
+  /* 계획/실제 서브헤더 */
+  .sub-header { background: #f5f5f5; font-size: 9px; color: #444; }
+  /* 목표 열 */
+  .col-goal { width: 80px; background: #f0f0f0; font-weight: bold; font-size: 10px; }
+  .goal-cell { font-size: 9px; vertical-align: top; text-align: left; padding: 3px; }
+  /* AM/PM 레이블 행 */
+  .time-label { background: #f5f5f5; font-weight: bold; }
+  /* 시간 셀 */
+  .time-cell { background: #fafafa; }
+  /* 입력 가능 셀 */
+  td[contenteditable="true"]:focus { background: #fffde7; outline: none; }
+  /* 하단 요약 테이블 */
+  .summary { margin-top: 6px; width: 100%; border-collapse: collapse; }
+  .summary td { border: 1px solid #999; padding: 5px 6px; font-size: 10px; vertical-align: top; }
+  .summary .label { background: #e8e8e8; font-weight: bold; width: 60px; text-align: center; }
+  .summary .wide { width: 220px; }
+  .summary [contenteditable="true"]:focus { background: #fffde7; outline: none; }
+  @media print {
+    body { padding: 4px; }
+    td[contenteditable="true"]:focus { background: #fff; }
+  }
+</style>
 </head>
 <body>
-<div id="print-root"></div>
-<div id="root"></div>
-<script type="text/babel">
-const { useState } = React;
-const ME = { name: "이예진", group: "삶다수", grade: "7" };
-const TABS = [
-  { id: "sermon_main", label: "대예배 설교노트" },
-  { id: "sermon_college", label: "대학부 설교노트" },
-  { id: "qt1", label: "큐티 1" },
-  { id: "qt2", label: "큐티 2" },
-  { id: "prayer", label: "기도일지" },
-  { id: "weekly", label: "위클리" },
+
+<h2>Weekly Check List</h2>
+<div class="meta">
+  이름 : <span contenteditable="true">이름</span> &nbsp;&nbsp;&nbsp; 기간 : <span contenteditable="true">2026.03.__ ~ 03.__</span>
+</div>
+
+<table>
+  <colgroup>
+    <col class="col-time">
+    <!-- 일~토 각 2열 = 14열 -->
+    <col span="2" style="width:calc((100% - 36px - 80px)/7)">
+    <col span="2" style="width:calc((100% - 36px - 80px)/7)">
+    <col span="2" style="width:calc((100% - 36px - 80px)/7)">
+    <col span="2" style="width:calc((100% - 36px - 80px)/7)">
+    <col span="2" style="width:calc((100% - 36px - 80px)/7)">
+    <col span="2" style="width:calc((100% - 36px - 80px)/7)">
+    <col span="2" style="width:calc((100% - 36px - 80px)/7)">
+    <col class="col-goal">
+  </colgroup>
+  <thead>
+    <tr>
+      <th rowspan="2" class="col-time">시간</th>
+      <th colspan="2" class="day-header">일</th>
+      <th colspan="2" class="day-header">월</th>
+      <th colspan="2" class="day-header">화</th>
+      <th colspan="2" class="day-header">수</th>
+      <th colspan="2" class="day-header">목</th>
+      <th colspan="2" class="day-header">금</th>
+      <th colspan="2" class="day-header">토</th>
+      <th rowspan="2" class="col-goal">금주의 목표<br>(우선순위)</th>
+    </tr>
+    <tr>
+      <th class="sub-header">계획</th><th class="sub-header">실제</th>
+      <th class="sub-header">계획</th><th class="sub-header">실제</th>
+      <th class="sub-header">계획</th><th class="sub-header">실제</th>
+      <th class="sub-header">계획</th><th class="sub-header">실제</th>
+      <th class="sub-header">계획</th><th class="sub-header">실제</th>
+      <th class="sub-header">계획</th><th class="sub-header">실제</th>
+      <th class="sub-header">계획</th><th class="sub-header">실제</th>
+    </tr>
+  </thead>
+  <tbody id="timeBody"></tbody>
+</table>
+
+<table class="summary">
+  <tr>
+    <td class="label">잘한 것</td>
+    <td class="wide" contenteditable="true"></td>
+    <td class="label">잘하지<br>못한 것</td>
+    <td class="wide" contenteditable="true"></td>
+    <td class="label">개선해야<br>할 것</td>
+    <td contenteditable="true"></td>
+  </tr>
+  <tr>
+    <td class="label">전도 보고<br>및 느낀 점</td>
+    <td colspan="5" contenteditable="true" style="min-height:40px"></td>
+  </tr>
+</table>
+
+<script>
+const slots = [
+  { label: 'AM 4', ampm: true }, { label: '5' }, { label: '6' },
+  { label: '7' }, { label: '8' }, { label: '9' }, { label: '10' },
+  { label: '11' },
+  { label: 'PM 12', ampm: true }, { label: '1' }, { label: '2' },
+  { label: '3' }, { label: '4' }, { label: '5' }, { label: '6' },
+  { label: '7' }, { label: '8' }, { label: '9' }, { label: '10' },
+  { label: '11' },
+  { label: 'AM 12', ampm: true }, { label: '1' }, { label: '2' },
+  { label: '3' }
 ];
-const esc = s => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-const inS = { width:"100%", padding:"8px 10px", border:"1px solid #d1d5db", borderRadius:6, fontSize:13, fontFamily:"inherit", boxSizing:"border-box" };
-const taS = { ...inS, resize:"vertical" };
 
-const doPrint = (html) => {
-  const root = document.getElementById('print-root');
-  root.innerHTML = `<div class="pa">${html}</div>`;
-  window.print();
-  root.innerHTML = '';
-};
+const tbody = document.getElementById('timeBody');
+let goalSet = false;
 
-const Field = ({ label, value, onChange, multiline, placeholder, rows=3 }) => (
-  <div style={{ marginBottom:14 }}>
-    <label style={{ display:"block", fontWeight:600, fontSize:13, color:"#374151", marginBottom:4 }}>{label}</label>
-    {multiline
-      ? <textarea value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder||""} rows={rows} style={taS} />
-      : <input type="text" value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder||""} style={inS} />
-    }
-  </div>
-);
-
-const PrintBtn = ({ onClick }) => (
-  <div style={{ marginTop:20, textAlign:"center" }}>
-    <button onClick={onClick} style={{ background:"#4f46e5", color:"#fff", border:"none", borderRadius:8, padding:"11px 28px", fontSize:14, fontWeight:700, cursor:"pointer", boxShadow:"0 2px 8px rgba(79,70,229,0.3)" }}>
-      🖨️ 이 양식 인쇄
-    </button>
-  </div>
-);
-
-// ── 설교노트 ──
-const SermonForm = ({ data, setData, label }) => {
-  const getHTML = () => `
-    <div class="doc-title">대학 7부 갈렙 설교 노트</div>
-    <div style="display:flex; border:1px solid #000; margin-bottom:8px; font-size:11px;">
-      <div style="flex:1; padding:3px 6px; border-right:1px solid #000;"><div style="font-size:9px;color:#555">날짜</div>${esc(data.date)}</div>
-      <div style="flex:1; padding:3px 6px; border-right:1px solid #000;"><div style="font-size:9px;color:#555">구분</div>${esc(label)}</div>
-      <div style="flex:1; padding:3px 6px;"><div style="font-size:9px;color:#555">이름</div>${ME.name}</div>
-    </div>
-    <table>
-      <tr><th style="width:70px;background:#d9d9d9">설교제목</th><td class="content-area">${esc(data.title)}</td></tr>
-      <tr><th style="background:#d9d9d9">설교<br/>요약</th><td class="content-area xtall">${esc(data.summary)}</td></tr>
-      <tr><th style="background:#d9d9d9">느낀점<br/><span style="font-size:9px;font-weight:400">(은혜나눔)</span></th><td class="content-area xtall">${esc(data.feeling)}</td></tr>
-      <tr><th style="background:#d9d9d9">적용</th><td class="content-area xtall">${esc(data.apply)}</td></tr>
-    </table>
-  `;
-  return (
-    <div>
-      <Field label="날짜" value={data.date} onChange={v=>setData(p=>({...p,date:v}))} placeholder="예) 2025.03.09" />
-      <Field label="설교제목" value={data.title} onChange={v=>setData(p=>({...p,title:v}))} />
-      <Field label="설교 요약" value={data.summary} onChange={v=>setData(p=>({...p,summary:v}))} multiline />
-      <Field label="느낀점 및 은혜나눔" value={data.feeling} onChange={v=>setData(p=>({...p,feeling:v}))} multiline />
-      <Field label="적용" value={data.apply} onChange={v=>setData(p=>({...p,apply:v}))} multiline />
-      <PrintBtn onClick={() => doPrint(getHTML())} />
-    </div>
-  );
-};
-
-// ── 큐티 (원본 2단 레이아웃) ──
-const QTForm = ({ data, setData }) => {
-  const getHTML = () => `
-    <div class="doc-title">큐티 묵상 Homework</div>
-    <div style="display:flex; border:1px solid #000; margin-bottom:8px; font-size:11px;">
-      <div style="flex:1;padding:3px 6px;border-right:1px solid #000;"><div style="font-size:9px;color:#555">날짜 :</div>${esc(data.date)}</div>
-      <div style="flex:1;padding:3px 6px;border-right:1px solid #000;"><div style="font-size:9px;color:#555">본문 :</div>${esc(data.book)}</div>
-      <div style="flex:1;padding:3px 6px;border-right:1px solid #000;"><div style="font-size:9px;color:#555">반 :</div>${ME.group}</div>
-      <div style="flex:1;padding:3px 6px;"><div style="font-size:9px;color:#555">이름 :</div>${ME.name}</div>
-    </div>
-    <table>
-      <tr class="row-obs">
-        <td rowspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;width:55px;vertical-align:middle">관찰</td>
-        <td style="background:#d9d9d9;font-weight:700;font-size:10px;width:80px;vertical-align:top">문체<br/>구분 및 정리</td>
-        <td style="white-space:pre-wrap;vertical-align:top;font-size:11px;padding:4px 6px">${esc(data.observation)}</td>
-        <td style="background:#d9d9d9;font-weight:700;font-size:10px;width:70px;text-align:center;vertical-align:top">
-          하나님과<br/>관련된<br/>기록<br/><span style="font-size:8px;font-weight:400">(행적 or<br/>하신말씀<br/>or 은혜)</span>
-        </td>
-        <td style="white-space:pre-wrap;vertical-align:top;font-size:11px;padding:4px 6px" rowspan="2">${esc(data.god)}</td>
-      </tr>
-      <tr class="row-sum">
-        <td style="background:#d9d9d9;font-weight:700;font-size:10px;vertical-align:top">줄거리 요약<br/>or 반복/대조<br/>찾기 (강조)</td>
-        <td style="white-space:pre-wrap;vertical-align:top;font-size:11px;padding:4px 6px">${esc(data.summary)}</td>
-        <td style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:top">
-          배경적<br/>관찰<br/><span style="font-size:8px;font-weight:400">(장소 &<br/>시간 &<br/>등장인물)</span>
-        </td>
-      </tr>
-      <tr class="row-interp">
-        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:top;padding-top:6px">해석</td>
-        <td colspan="3" style="vertical-align:top;padding:4px 6px">
-          <div style="font-size:9px;color:#555;margin-bottom:4px">※ 2~3개의 질문과 답을 통해 말씀의 의미와 핵심 메시지 찾기</div>
-          <div style="white-space:pre-wrap;font-size:11px">${esc(data.questions)}</div>
-        </td>
-      </tr>
-      <tr class="row-msg">
-        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:middle">핵심<br/>메시지</td>
-        <td colspan="3" style="white-space:pre-wrap;vertical-align:top;font-size:11px;padding:4px 6px">${esc(data.message)}</td>
-      </tr>
-      <tr class="row-feel">
-        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:middle">느낀점<br/>(결단)</td>
-        <td colspan="3" style="white-space:pre-wrap;vertical-align:top;font-size:11px;padding:4px 6px">${esc(data.feeling)}</td>
-      </tr>
-      <tr class="row-apply">
-        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:top;padding-top:6px">적용</td>
-        <td colspan="3" style="vertical-align:top;padding:4px 6px">
-          <div style="font-size:9px;color:#555;margin-bottom:4px">※ 결단을 구체적으로 실천할 수 있는 창의적인 방법을 생각해서 적용을 부탁드립니다</div>
-          <div style="white-space:pre-wrap;font-size:11px">${esc(data.apply)}</div>
-        </td>
-      </tr>
-      <tr class="row-review">
-        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:top;padding-top:6px">하루를<br/>돌아보며<br/>(은혜나눔)</td>
-        <td colspan="3" style="vertical-align:top;padding:4px 6px">
-          <div style="font-size:9px;color:#555;margin-bottom:4px">※ 오늘 묵상한 큐티에 비추어 하루를 돌아보며 나눔을 부탁합니다</div>
-          <div style="white-space:pre-wrap;font-size:11px">${esc(data.review)}</div>
-        </td>
-      </tr>
-    </table>
-  `;
-  return (
-    <div>
-      <Field label="날짜" value={data.date} onChange={v=>setData(p=>({...p,date:v}))} />
-      <Field label="본문" value={data.book} onChange={v=>setData(p=>({...p,book:v}))} placeholder="예) 창세기 1:1-10" />
-      <Field label="관찰 - 문체/구분 및 정리" value={data.observation} onChange={v=>setData(p=>({...p,observation:v}))} multiline />
-      <Field label="줄거리 요약 / 반복·대조 (강조)" value={data.summary} onChange={v=>setData(p=>({...p,summary:v}))} multiline />
-      <Field label="하나님과 관련된 기록" value={data.god} onChange={v=>setData(p=>({...p,god:v}))} multiline />
-      <Field label="배경적 관찰 (시간/장소/등장인물)" value={data.background} onChange={v=>setData(p=>({...p,background:v}))} multiline />
-      <Field label="해석 질문 (2~3개 + 답)" value={data.questions} onChange={v=>setData(p=>({...p,questions:v}))} multiline />
-      <Field label="핵심 메시지" value={data.message} onChange={v=>setData(p=>({...p,message:v}))} multiline />
-      <Field label="느낀점 및 결단" value={data.feeling} onChange={v=>setData(p=>({...p,feeling:v}))} multiline />
-      <Field label="적용" value={data.apply} onChange={v=>setData(p=>({...p,apply:v}))} multiline />
-      <Field label="하루를 돌아보며 (은혜 나눔)" value={data.review} onChange={v=>setData(p=>({...p,review:v}))} multiline />
-      <PrintBtn onClick={() => doPrint(getHTML())} />
-    </div>
-  );
-};
-
-// ── 기도일지 (원본: 날짜/시간/장소/내용 4컬럼, 7행) ──
-const PrayerForm = ({ prayer, setPrayer }) => {
-  const getHTML = () => `
-    <div class="doc-title">제자훈련 코람데오 기도일지</div>
-    <div style="font-size:11px; margin-bottom:8px;">
-      제자반명 <u style="display:inline-block;min-width:80px">${ME.group}</u>
-      &nbsp;&nbsp; 이름 <u style="display:inline-block;min-width:80px">${ME.name}</u>
-      &nbsp;&nbsp; 학년 <u style="display:inline-block;min-width:40px">${ME.grade}</u>
-    </div>
-    <table>
-      <tr>
-        <th style="width:55px;text-align:center">날짜</th>
-        <th style="width:80px;text-align:center">시간</th>
-        <th style="width:55px;text-align:center">장소</th>
-        <th style="text-align:center">내용</th>
-      </tr>
-      ${prayer.map(r => `
-        <tr>
-          <td style="text-align:center;font-size:11px">${esc(r.date)}</td>
-          <td style="text-align:center;font-size:11px">
-            ${esc(r.startTime)}<br/>~<br/>${esc(r.endTime)}
-          </td>
-          <td style="text-align:center;font-size:11px">${esc(r.place)}</td>
-          <td style="white-space:pre-wrap;min-height:80px;font-size:11px">${esc(r.content)}</td>
-        </tr>
-      `).join('')}
-      ${Array(Math.max(0, 7 - prayer.length)).fill(`
-        <tr>
-          <td style="height:80px"></td><td></td><td></td><td></td>
-        </tr>
-      `).join('')}
-    </table>
-  `;
-  return (
-    <div>
-      {prayer.map((row,i) => (
-        <div key={i} style={{ background:"#f9fafb", borderRadius:8, padding:14, marginBottom:12, border:"1px solid #e5e7eb" }}>
-          <div style={{ fontWeight:700, fontSize:13, color:"#6b7280", marginBottom:10 }}>기도 {i+1}</div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:8 }}>
-            {[["date","날짜"],["startTime","시작 시간"],["endTime","종료 시간"]].map(([k,lbl])=>(
-              <div key={k}>
-                <label style={{ display:"block", fontWeight:600, fontSize:12, color:"#374151", marginBottom:3 }}>{lbl}</label>
-                <input type="text" value={row[k]} onChange={e=>setPrayer(prayer.map((r,ri)=>ri===i?{...r,[k]:e.target.value}:r))} style={{ width:"100%", padding:"6px 8px", border:"1px solid #d1d5db", borderRadius:5, fontSize:12, boxSizing:"border-box" }} />
-              </div>
-            ))}
-          </div>
-          <Field label="장소" value={row.place} onChange={v=>setPrayer(prayer.map((r,ri)=>ri===i?{...r,place:v}:r))} />
-          <Field label="내용" value={row.content} onChange={v=>setPrayer(prayer.map((r,ri)=>ri===i?{...r,content:v}:r))} multiline />
-          {prayer.length>1 && <button onClick={()=>setPrayer(prayer.filter((_,ri)=>ri!==i))} style={{ fontSize:11, color:"#ef4444", background:"none", border:"none", cursor:"pointer" }}>삭제</button>}
-        </div>
-      ))}
-      <button onClick={()=>setPrayer([...prayer,{date:"",startTime:"",endTime:"",place:"",content:""}])} style={{ fontSize:13, color:"#6366f1", background:"none", border:"1px solid #6366f1", borderRadius:6, padding:"6px 14px", cursor:"pointer", marginBottom:16 }}>+ 기도 추가</button>
-      <PrintBtn onClick={() => doPrint(getHTML())} />
-    </div>
-  );
-};
-
-// ── 위클리 ──
-const WeeklyForm = ({ weekly, setWeekly }) => {
-  const HOURS = ['AM 4','5','6','7','8','9','10','11','PM 12','1','2','3','4','5','6','7','8','9','10','11','AM 12','1','2','3'];
-  const DAYS = ['일','월','화','수','목','금','토'];
-  const getHTML = () => `
-    <div class="doc-title">Weekly Check List</div>
-    <div style="font-size:11px;border:1px solid #000;padding:3px 6px;margin-bottom:6px;">
-      이름 : ${ME.name} &nbsp;&nbsp;&nbsp; 기간 : ${esc(weekly.week)}
-    </div>
-    <table style="margin-bottom:6px;font-size:9px;">
-      <tr>
-        <th style="background:#d9d9d9;width:28px;text-align:center">시간</th>
-        ${DAYS.map(d=>`<th style="background:#d9d9d9;text-align:center">${d}</th>`).join('')}
-        <th style="background:#d9d9d9;text-align:center;width:80px">금주의 목표<br/>(우선순위)</th>
-      </tr>
-      <tr>
-        <td style="background:#f5f5f5;text-align:center;font-size:8px;white-space:nowrap">${HOURS[0]}</td>
-        ${DAYS.map(()=>`<td style="height:14px"></td>`).join('')}
-        <td rowspan="${HOURS.length}" style="vertical-align:top;font-size:9px;padding:4px;white-space:pre-wrap">${esc(weekly.goals)}</td>
-      </tr>
-      ${HOURS.slice(1).map(h=>`
-        <tr>
-          <td style="background:#f5f5f5;text-align:center;font-size:8px;white-space:nowrap">${h}</td>
-          ${DAYS.map(()=>`<td style="height:14px"></td>`).join('')}
-        </tr>
-      `).join('')}
-    </table>
-    <table style="margin-bottom:6px;">
-      <tr>
-        <th style="background:#d9d9d9;text-align:center;width:60px">잘한 것</th>
-        <td class="content-area">${esc(weekly.good)}</td>
-        <th style="background:#d9d9d9;text-align:center;width:70px">잘하지<br/>못한 것</th>
-        <td class="content-area">${esc(weekly.bad)}</td>
-        <th style="background:#d9d9d9;text-align:center;width:70px">개선해야<br/>할 것</th>
-        <td class="content-area">${esc(weekly.improve)}</td>
-      </tr>
-    </table>
-    <table>
-      <tr>
-        <th style="background:#d9d9d9;text-align:center;width:60px">전도 보고<br/>및 느낀 점</th>
-        <td class="content-area">${esc(weekly.evangelism)}</td>
-      </tr>
-    </table>
-  `;
-  return (
-    <div>
-      <Field label="주차" value={weekly.week} onChange={v=>setWeekly(p=>({...p,week:v}))} placeholder="예) 2025.03.09 - 03.15" />
-      <Field label="금주의 목표 (우선순위)" value={weekly.goals} onChange={v=>setWeekly(p=>({...p,goals:v}))} multiline />
-      <Field label="잘한 것" value={weekly.good} onChange={v=>setWeekly(p=>({...p,good:v}))} multiline />
-      <Field label="잘하지 못한 것" value={weekly.bad} onChange={v=>setWeekly(p=>({...p,bad:v}))} multiline />
-      <Field label="개선해야 할 것" value={weekly.improve} onChange={v=>setWeekly(p=>({...p,improve:v}))} multiline />
-      <Field label="전도 보고 및 느낀 점" value={weekly.evangelism} onChange={v=>setWeekly(p=>({...p,evangelism:v}))} multiline />
-      <PrintBtn onClick={() => doPrint(getHTML())} />
-    </div>
-  );
-};
-
-// ── 암송/예습 ──
-const MemoForm = ({ memo, setMemo }) => (
-  <div>
-    <div style={{ background:"#fef9c3", border:"1px solid #fde68a", borderRadius:8, padding:12, marginBottom:16, fontSize:13, color:"#92400e" }}>
-      💡 말씀 암송은 <strong>사랑의교회 앱</strong>에서, 제자반 예습은 <strong>교재</strong>에서 직접 진행. 여기선 메모만!
-    </div>
-    <Field label="말씀 암송 — 이번 주 구절 메모" value={memo.memorization} onChange={v=>setMemo(p=>({...p,memorization:v}))} multiline placeholder="암송할 3구절" />
-    <Field label="제자반 예습 — 진행 현황 / 메모" value={memo.preview} onChange={v=>setMemo(p=>({...p,preview:v}))} multiline placeholder="예습 메모" />
-  </div>
-);
-
-function App() {
-  const [tab, setTab] = useState("sermon_main");
-  const [sermonMain, setSermonMain] = useState({ date:"", title:"", summary:"", feeling:"", apply:"" });
-  const [sermonCollege, setSermonCollege] = useState({ date:"", title:"", summary:"", feeling:"", apply:"" });
-  const [qt1, setQt1] = useState({ date:"", book:"", observation:"", summary:"", god:"", background:"", questions:"", message:"", feeling:"", apply:"", review:"" });
-  const [qt2, setQt2] = useState({ date:"", book:"", observation:"", summary:"", god:"", background:"", questions:"", message:"", feeling:"", apply:"", review:"" });
-  const [prayer, setPrayer] = useState([{ date:"", startTime:"", endTime:"", place:"", content:"" }]);
-  const [weekly, setWeekly] = useState({ week:"", goals:"", good:"", bad:"", improve:"", evangelism:"" });
-  const [memo, setMemo] = useState({ memorization:"", preview:"" });
-
-  const renderTab = () => {
-    if (tab==="sermon_main") return <SermonForm data={sermonMain} setData={setSermonMain} label="주일대예배" />;
-    if (tab==="sermon_college") return <SermonForm data={sermonCollege} setData={setSermonCollege} label="대학부예배" />;
-    if (tab==="qt1") return <QTForm data={qt1} setData={setQt1} />;
-    if (tab==="qt2") return <QTForm data={qt2} setData={setQt2} />;
-    if (tab==="prayer") return <PrayerForm prayer={prayer} setPrayer={setPrayer} />;
-    if (tab==="weekly") return <WeeklyForm weekly={weekly} setWeekly={setWeekly} />;
-
-  };
-
-  return (
-    <div style={{ minHeight:"100vh", background:"#f3f4f6" }}>
-      <div style={{ maxWidth:720, margin:"0 auto", padding:"24px 16px" }}>
-        <div style={{ marginBottom:20, textAlign:"center" }}>
-          <h1 style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", margin:0 }}>제자훈련 주간 과제</h1>
-          <p style={{ fontSize:12, color:"#6b7280", marginTop:4 }}>이예진 · 삶다수 · 7학년 &nbsp;|&nbsp; 매주 수요일 PM 7:30 제출 &nbsp;|&nbsp; ✍️ 말씀 통독, 암송, 예습도 잊지 말기!</p>
-        </div>
-        <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:20 }}>
-          {TABS.map(t=>(
-            <button key={t.id} onClick={()=>setTab(t.id)} style={{ fontSize:12, padding:"6px 12px", borderRadius:20, border:"none", cursor:"pointer", background:tab===t.id?"#4f46e5":"#e5e7eb", color:tab===t.id?"#fff":"#374151", fontWeight:tab===t.id?700:400 }}>
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <div style={{ background:"#fff", borderRadius:12, padding:20, boxShadow:"0 1px 4px rgba(0,0,0,0.08)" }}>
-          {renderTab()}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+slots.forEach((s, i) => {
+  const tr = document.createElement('tr');
+  // 시간 셀
+  const td = document.createElement('td');
+  td.className = 'time-cell' + (s.ampm ? ' time-label' : '');
+  td.textContent = s.label;
+  tr.appendChild(td);
+  // 14개 데이터 셀
+  for (let c = 0; c < 14; c++) {
+    const cell = document.createElement('td');
+    cell.contentEditable = 'true';
+    cell.style.height = '18px';
+    tr.appendChild(cell);
+  }
+  // 목표 열: 첫 행에만 rowspan
+  if (!goalSet) {
+    const goalTd = document.createElement('td');
+    goalTd.rowSpan = slots.length;
+    goalTd.className = 'goal-cell';
+    goalTd.contentEditable = 'true';
+    tr.appendChild(goalTd);
+    goalSet = true;
+  }
+  tbody.appendChild(tr);
+});
 </script>
 </body>
 </html>
