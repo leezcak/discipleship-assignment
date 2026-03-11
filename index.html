@@ -30,9 +30,18 @@
       .pa .meta-cell { flex: 1; padding: 3px 6px; border-right: 1px solid #000; }
       .pa .meta-cell:last-child { border-right: none; }
       .pa .meta-label { font-size: 9px; color: #555; }
-      .pa .content-area { white-space: pre-wrap; min-height: 50px; line-height: 1.6; font-size: 11px; }
-      .pa .content-area.tall { min-height: 80px; }
-      .pa .content-area.xtall { min-height: 120px; }
+      .pa .content-area { white-space: pre-wrap; height: 60px; line-height: 1.6; font-size: 11px; overflow: visible; }
+      .pa .content-area.tall { height: 90px; }
+      .pa .content-area.xtall { height: 130px; }
+      .pa .content-area.fixed-sm { height: 40px; }
+      /* 큐티 각 행 고정 높이 */
+      .pa tr.row-obs td, .pa tr.row-obs th { height: 80px; }
+      .pa tr.row-sum td, .pa tr.row-sum th { height: 80px; }
+      .pa tr.row-interp td, .pa tr.row-interp th { height: 100px; }
+      .pa tr.row-msg td, .pa tr.row-msg th { height: 50px; }
+      .pa tr.row-feel td, .pa tr.row-feel th { height: 80px; }
+      .pa tr.row-apply td, .pa tr.row-apply th { height: 100px; }
+      .pa tr.row-review td, .pa tr.row-review th { height: 100px; }
       .pa .row-label { background: #d9d9d9; font-weight: 700; font-size: 10px; text-align: center; width: 70px; vertical-align: middle; }
       .pa .sub-label { font-size: 9px; color: #444; font-weight: 400; }
       .pa .note { font-size: 9px; color: #555; font-style: italic; }
@@ -122,49 +131,49 @@ const QTForm = ({ data, setData }) => {
       <div style="flex:1;padding:3px 6px;"><div style="font-size:9px;color:#555">이름 :</div>${ME.name}</div>
     </div>
     <table>
-      <tr>
+      <tr class="row-obs">
         <td rowspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;width:55px;vertical-align:middle">관찰</td>
         <td style="background:#d9d9d9;font-weight:700;font-size:10px;width:80px;vertical-align:top">문체<br/>구분 및 정리</td>
-        <td class="content-area tall">${esc(data.observation)}</td>
+        <td style="white-space:pre-wrap;vertical-align:top;font-size:11px;padding:4px 6px">${esc(data.observation)}</td>
         <td style="background:#d9d9d9;font-weight:700;font-size:10px;width:70px;text-align:center;vertical-align:top">
           하나님과<br/>관련된<br/>기록<br/><span style="font-size:8px;font-weight:400">(행적 or<br/>하신말씀<br/>or 은혜)</span>
         </td>
-        <td class="content-area tall" rowspan="2">${esc(data.god)}</td>
+        <td style="white-space:pre-wrap;vertical-align:top;font-size:11px;padding:4px 6px" rowspan="2">${esc(data.god)}</td>
       </tr>
-      <tr>
+      <tr class="row-sum">
         <td style="background:#d9d9d9;font-weight:700;font-size:10px;vertical-align:top">줄거리 요약<br/>or 반복/대조<br/>찾기 (강조)</td>
-        <td class="content-area tall">${esc(data.summary)}</td>
+        <td style="white-space:pre-wrap;vertical-align:top;font-size:11px;padding:4px 6px">${esc(data.summary)}</td>
         <td style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:top">
           배경적<br/>관찰<br/><span style="font-size:8px;font-weight:400">(장소 &<br/>시간 &<br/>등장인물)</span>
         </td>
       </tr>
-      <tr>
-        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:middle">해석</td>
-        <td colspan="3">
+      <tr class="row-interp">
+        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:top;padding-top:6px">해석</td>
+        <td colspan="3" style="vertical-align:top;padding:4px 6px">
           <div style="font-size:9px;color:#555;margin-bottom:4px">※ 2~3개의 질문과 답을 통해 말씀의 의미와 핵심 메시지 찾기</div>
-          <div class="content-area tall">${esc(data.questions)}</div>
+          <div style="white-space:pre-wrap;font-size:11px">${esc(data.questions)}</div>
         </td>
       </tr>
-      <tr>
+      <tr class="row-msg">
         <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:middle">핵심<br/>메시지</td>
-        <td colspan="3" class="content-area">${esc(data.message)}</td>
+        <td colspan="3" style="white-space:pre-wrap;vertical-align:top;font-size:11px;padding:4px 6px">${esc(data.message)}</td>
       </tr>
-      <tr>
+      <tr class="row-feel">
         <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:middle">느낀점<br/>(결단)</td>
-        <td colspan="3" class="content-area tall">${esc(data.feeling)}</td>
+        <td colspan="3" style="white-space:pre-wrap;vertical-align:top;font-size:11px;padding:4px 6px">${esc(data.feeling)}</td>
       </tr>
-      <tr>
-        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:middle">적용</td>
-        <td colspan="3">
+      <tr class="row-apply">
+        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:top;padding-top:6px">적용</td>
+        <td colspan="3" style="vertical-align:top;padding:4px 6px">
           <div style="font-size:9px;color:#555;margin-bottom:4px">※ 결단을 구체적으로 실천할 수 있는 창의적인 방법을 생각해서 적용을 부탁드립니다</div>
-          <div class="content-area tall">${esc(data.apply)}</div>
+          <div style="white-space:pre-wrap;font-size:11px">${esc(data.apply)}</div>
         </td>
       </tr>
-      <tr>
-        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:middle">하루를<br/>돌아보며<br/>(은혜나눔)</td>
-        <td colspan="3">
+      <tr class="row-review">
+        <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:top;padding-top:6px">하루를<br/>돌아보며<br/>(은혜나눔)</td>
+        <td colspan="3" style="vertical-align:top;padding:4px 6px">
           <div style="font-size:9px;color:#555;margin-bottom:4px">※ 오늘 묵상한 큐티에 비추어 하루를 돌아보며 나눔을 부탁합니다</div>
-          <div class="content-area tall">${esc(data.review)}</div>
+          <div style="white-space:pre-wrap;font-size:11px">${esc(data.review)}</div>
         </td>
       </tr>
     </table>
