@@ -246,31 +246,41 @@ const PrayerForm = ({ prayer, setPrayer }) => {
 
 // ── 위클리 ──
 const WeeklyForm = ({ weekly, setWeekly }) => {
+  const HOURS = ['AM 4','5','6','7','8','9','10','11','PM 12','1','2','3','4','5','6','7','8','9','10','11','AM 12','1','2','3'];
+  const DAYS = ['일','월','화','수','목','금','토'];
   const getHTML = () => `
     <div class="doc-title">Weekly Check List</div>
-    <div style="font-size:11px;border:1px solid #000;padding:3px 6px;margin-bottom:8px;">
+    <div style="font-size:11px;border:1px solid #000;padding:3px 6px;margin-bottom:6px;">
       이름 : ${ME.name} &nbsp;&nbsp;&nbsp; 기간 : ${esc(weekly.week)}
     </div>
-    <table>
+    <table style="margin-bottom:6px;font-size:9px;">
       <tr>
-        <th style="width:80px;background:#d9d9d9;text-align:center">금주의 목표<br/>(우선순위)</th>
-        <td class="content-area tall">${esc(weekly.goals)}</td>
+        <th style="background:#d9d9d9;width:28px;text-align:center">시간</th>
+        ${DAYS.map(d=>`<th style="background:#d9d9d9;text-align:center">${d}</th>`).join('')}
+        <th style="background:#d9d9d9;text-align:center;width:80px">금주의 목표<br/>(우선순위)</th>
       </tr>
+      ${HOURS.map((h,i)=>`
+        <tr>
+          <td style="background:#f5f5f5;text-align:center;font-size:8px;white-space:nowrap">${h}</td>
+          ${DAYS.map(()=>`<td style="height:14px"></td>`).join('')}
+          <td style="vertical-align:top;font-size:9px">${i===0?esc(weekly.goals):''}</td>
+        </tr>
+      `).join('')}
+    </table>
+    <table style="margin-bottom:6px;">
       <tr>
-        <th style="background:#d9d9d9;text-align:center">한 주를<br/>돌아보며<br/><br/>잘한 것</th>
+        <th style="background:#d9d9d9;text-align:center;width:60px">잘한 것</th>
         <td class="content-area">${esc(weekly.good)}</td>
-      </tr>
-      <tr>
-        <th style="background:#d9d9d9;text-align:center">잘하지<br/>못한 것</th>
+        <th style="background:#d9d9d9;text-align:center;width:70px">잘하지<br/>못한 것</th>
         <td class="content-area">${esc(weekly.bad)}</td>
-      </tr>
-      <tr>
-        <th style="background:#d9d9d9;text-align:center">개선해야<br/>할 것</th>
+        <th style="background:#d9d9d9;text-align:center;width:70px">개선해야<br/>할 것</th>
         <td class="content-area">${esc(weekly.improve)}</td>
       </tr>
+    </table>
+    <table>
       <tr>
-        <th style="background:#d9d9d9;text-align:center">전도 보고<br/>및 느낀 점</th>
-        <td class="content-area tall">${esc(weekly.evangelism)}</td>
+        <th style="background:#d9d9d9;text-align:center;width:60px">전도 보고<br/>및 느낀 점</th>
+        <td class="content-area">${esc(weekly.evangelism)}</td>
       </tr>
     </table>
   `;
