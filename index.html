@@ -10,33 +10,31 @@
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: 'Apple SD Gothic Neo', sans-serif; background: #f3f4f6; }
+    #print-root { display: none; }
     @media print {
-      .no-print { display: none !important; }
-      .print-only { display: block !important; }
-      body { background: #fff; }
+      body > #root { display: none; }
+      #print-root { display: block; }
+      .print-area table { width: 100%; border-collapse: collapse; }
+      .print-area td { border: 1px solid #000; padding: 5px 8px; font-size: 12px; vertical-align: top; }
+      .print-area .hd { background: #e8e8e8; font-weight: 700; }
+      .print-area .form-title { font-size: 15px; font-weight: 800; text-align: center; border: 2px solid #000; padding: 6px; margin-bottom: 10px; }
+      .print-area .meta { display: flex; border: 1px solid #000; margin-bottom: 10px; }
+      .print-area .meta-cell { flex: 1; padding: 4px 8px; border-right: 1px solid #000; font-size: 12px; }
+      .print-area .meta-cell:last-child { border-right: none; }
+      .print-area .meta-label { font-size: 10px; color: #555; }
+      .print-area .sec { border: 1px solid #000; margin-bottom: -1px; }
+      .print-area .sec-hd { background: #e8e8e8; font-size: 11px; font-weight: 700; padding: 3px 8px; border-bottom: 1px solid #000; }
+      .print-area .sec-body { padding: 6px 8px; font-size: 12px; min-height: 60px; white-space: pre-wrap; line-height: 1.7; }
+      .print-area .sec-body.tall { min-height: 100px; }
     }
-    .print-only { display: none; }
-    .print-area table { width: 100%; border-collapse: collapse; font-family: 'Apple SD Gothic Neo', sans-serif; }
-    .print-area td { border: 1px solid #000; padding: 5px 8px; font-size: 12px; vertical-align: top; }
-    .print-area .hd { background: #e8e8e8; font-weight: 700; }
-    .print-area .form-title { font-size: 15px; font-weight: 800; text-align: center; border: 2px solid #000; padding: 6px; margin-bottom: 10px; }
-    .print-area .meta { display: flex; border: 1px solid #000; margin-bottom: 10px; }
-    .print-area .meta-cell { flex: 1; padding: 4px 8px; border-right: 1px solid #000; font-size: 12px; }
-    .print-area .meta-cell:last-child { border-right: none; }
-    .print-area .meta-label { font-size: 10px; color: #555; }
-    .print-area .sec { border: 1px solid #000; margin-bottom: -1px; }
-    .print-area .sec-hd { background: #e8e8e8; font-size: 11px; font-weight: 700; padding: 3px 8px; border-bottom: 1px solid #000; }
-    .print-area .sec-body { padding: 6px 8px; font-size: 12px; min-height: 60px; white-space: pre-wrap; line-height: 1.7; }
-    .print-area .sec-body.tall { min-height: 100px; }
   </style>
 </head>
 <body>
+<div id="print-root"></div>
 <div id="root"></div>
 <script type="text/babel">
 const { useState } = React;
-
 const ME = { name: "이예진", group: "삶다수", grade: "7" };
-
 const TABS = [
   { id: "sermon_main", label: "대예배 설교노트" },
   { id: "sermon_college", label: "대학부 설교노트" },
@@ -46,10 +44,16 @@ const TABS = [
   { id: "weekly", label: "위클리" },
   { id: "memo", label: "암송/예습 메모" },
 ];
-
 const esc = s => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const inS = { width:"100%", padding:"8px 10px", border:"1px solid #d1d5db", borderRadius:6, fontSize:13, fontFamily:"inherit", boxSizing:"border-box" };
 const taS = { ...inS, resize:"vertical" };
+
+const doPrint = (html) => {
+  const root = document.getElementById('print-root');
+  root.innerHTML = `<div class="print-area">${html}</div>`;
+  window.print();
+  root.innerHTML = '';
+};
 
 const Field = ({ label, value, onChange, multiline, placeholder, rows=3 }) => (
   <div style={{ marginBottom:14 }}>
@@ -69,19 +73,8 @@ const PrintBtn = ({ onClick }) => (
   </div>
 );
 
-const doPrint = (html, setPrinting) => {
-  setPrinting(true);
-  setTimeout(() => { window.print(); setPrinting(false); }, 150);
-};
-
-const PrintArea = ({ html }) => (
-  <div className="print-only print-area" dangerouslySetInnerHTML={{ __html: html }} />
-);
-
-// ── 설교노트 ──
 const SermonForm = ({ data, setData, label }) => {
-  const [printing, setPrinting] = useState(false);
-  const html = `
+  const getHTML = () => `
     <div class="form-title">대학 7부 갈렙 설교 노트</div>
     <div class="meta">
       <div class="meta-cell"><div class="meta-label">날짜</div>${esc(data.date)}</div>
@@ -95,21 +88,18 @@ const SermonForm = ({ data, setData, label }) => {
   `;
   return (
     <div>
-      {printing && <PrintArea html={html} />}
       <Field label="날짜" value={data.date} onChange={v=>setData(p=>({...p,date:v}))} placeholder="예) 2025.03.09" />
       <Field label="설교제목" value={data.title} onChange={v=>setData(p=>({...p,title:v}))} />
       <Field label="설교 요약" value={data.summary} onChange={v=>setData(p=>({...p,summary:v}))} multiline />
       <Field label="느낀점 및 은혜나눔" value={data.feeling} onChange={v=>setData(p=>({...p,feeling:v}))} multiline />
       <Field label="적용" value={data.apply} onChange={v=>setData(p=>({...p,apply:v}))} multiline />
-      <PrintBtn onClick={() => doPrint(html, setPrinting)} />
+      <PrintBtn onClick={() => doPrint(getHTML())} />
     </div>
   );
 };
 
-// ── 큐티 ──
 const QTForm = ({ data, setData }) => {
-  const [printing, setPrinting] = useState(false);
-  const html = `
+  const getHTML = () => `
     <div class="form-title">큐티 묵상 Homework</div>
     <div class="meta">
       <div class="meta-cell"><div class="meta-label">날짜</div>${esc(data.date)}</div>
@@ -131,7 +121,6 @@ const QTForm = ({ data, setData }) => {
   `;
   return (
     <div>
-      {printing && <PrintArea html={html} />}
       <Field label="날짜" value={data.date} onChange={v=>setData(p=>({...p,date:v}))} />
       <Field label="본문" value={data.book} onChange={v=>setData(p=>({...p,book:v}))} placeholder="예) 창세기 1:1-10" />
       <Field label="관찰 - 문체/구분 및 정리" value={data.observation} onChange={v=>setData(p=>({...p,observation:v}))} multiline />
@@ -143,15 +132,13 @@ const QTForm = ({ data, setData }) => {
       <Field label="느낀점 및 결단" value={data.feeling} onChange={v=>setData(p=>({...p,feeling:v}))} multiline />
       <Field label="적용" value={data.apply} onChange={v=>setData(p=>({...p,apply:v}))} multiline />
       <Field label="하루를 돌아보며 (은혜 나눔)" value={data.review} onChange={v=>setData(p=>({...p,review:v}))} multiline />
-      <PrintBtn onClick={() => doPrint(html, setPrinting)} />
+      <PrintBtn onClick={() => doPrint(getHTML())} />
     </div>
   );
 };
 
-// ── 기도일지 ──
 const PrayerForm = ({ prayer, setPrayer }) => {
-  const [printing, setPrinting] = useState(false);
-  const html = `
+  const getHTML = () => `
     <div class="form-title">제자훈련 코람데오 기도일지</div>
     <div class="meta">
       <div class="meta-cell"><div class="meta-label">제자반명</div>${ME.group}</div>
@@ -177,7 +164,6 @@ const PrayerForm = ({ prayer, setPrayer }) => {
   `;
   return (
     <div>
-      {printing && <PrintArea html={html} />}
       {prayer.map((row,i) => (
         <div key={i} style={{ background:"#f9fafb", borderRadius:8, padding:14, marginBottom:12, border:"1px solid #e5e7eb" }}>
           <div style={{ fontWeight:700, fontSize:13, color:"#6b7280", marginBottom:10 }}>기도 {i+1}</div>
@@ -195,15 +181,13 @@ const PrayerForm = ({ prayer, setPrayer }) => {
         </div>
       ))}
       <button onClick={()=>setPrayer([...prayer,{date:"",startTime:"",endTime:"",place:"",content:""}])} style={{ fontSize:13, color:"#6366f1", background:"none", border:"1px solid #6366f1", borderRadius:6, padding:"6px 14px", cursor:"pointer", marginBottom:16 }}>+ 기도 추가</button>
-      <PrintBtn onClick={() => doPrint(html, setPrinting)} />
+      <PrintBtn onClick={() => doPrint(getHTML())} />
     </div>
   );
 };
 
-// ── 위클리 ──
 const WeeklyForm = ({ weekly, setWeekly }) => {
-  const [printing, setPrinting] = useState(false);
-  const html = `
+  const getHTML = () => `
     <div class="form-title">Weekly Check List</div>
     <div class="meta">
       <div class="meta-cell"><div class="meta-label">이름</div>${ME.name}</div>
@@ -217,19 +201,17 @@ const WeeklyForm = ({ weekly, setWeekly }) => {
   `;
   return (
     <div>
-      {printing && <PrintArea html={html} />}
       <Field label="주차" value={weekly.week} onChange={v=>setWeekly(p=>({...p,week:v}))} placeholder="예) 2025.03.09 - 03.15" />
       <Field label="금주의 목표 (우선순위)" value={weekly.goals} onChange={v=>setWeekly(p=>({...p,goals:v}))} multiline />
       <Field label="잘한 것" value={weekly.good} onChange={v=>setWeekly(p=>({...p,good:v}))} multiline />
       <Field label="잘하지 못한 것" value={weekly.bad} onChange={v=>setWeekly(p=>({...p,bad:v}))} multiline />
       <Field label="개선해야 할 것" value={weekly.improve} onChange={v=>setWeekly(p=>({...p,improve:v}))} multiline />
       <Field label="전도 보고 및 느낀 점" value={weekly.evangelism} onChange={v=>setWeekly(p=>({...p,evangelism:v}))} multiline />
-      <PrintBtn onClick={() => doPrint(html, setPrinting)} />
+      <PrintBtn onClick={() => doPrint(getHTML())} />
     </div>
   );
 };
 
-// ── 암송/예습 ──
 const MemoForm = ({ memo, setMemo }) => (
   <div>
     <div style={{ background:"#fef9c3", border:"1px solid #fde68a", borderRadius:8, padding:12, marginBottom:16, fontSize:13, color:"#92400e" }}>
@@ -261,7 +243,7 @@ function App() {
   };
 
   return (
-    <div className="no-print" style={{ minHeight:"100vh", background:"#f3f4f6" }}>
+    <div style={{ minHeight:"100vh", background:"#f3f4f6" }}>
       <div style={{ maxWidth:720, margin:"0 auto", padding:"24px 16px" }}>
         <div style={{ marginBottom:20, textAlign:"center" }}>
           <h1 style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", margin:0 }}>제자훈련 주간 과제</h1>
