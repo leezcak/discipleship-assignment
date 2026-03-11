@@ -61,7 +61,6 @@ const TABS = [
   { id: "qt2", label: "큐티 2" },
   { id: "prayer", label: "기도일지" },
   { id: "weekly", label: "위클리" },
-  { id: "memo", label: "암송/예습 메모" },
 ];
 const esc = s => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const inS = { width:"100%", padding:"8px 10px", border:"1px solid #d1d5db", borderRadius:6, fontSize:13, fontFamily:"inherit", boxSizing:"border-box" };
@@ -334,7 +333,7 @@ function App() {
     if (tab==="qt2") return <QTForm data={qt2} setData={setQt2} />;
     if (tab==="prayer") return <PrayerForm prayer={prayer} setPrayer={setPrayer} />;
     if (tab==="weekly") return <WeeklyForm weekly={weekly} setWeekly={setWeekly} />;
-    if (tab==="memo") return <MemoForm memo={memo} setMemo={setMemo} />;
+
   };
 
   return (
@@ -342,7 +341,7 @@ function App() {
       <div style={{ maxWidth:720, margin:"0 auto", padding:"24px 16px" }}>
         <div style={{ marginBottom:20, textAlign:"center" }}>
           <h1 style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", margin:0 }}>제자훈련 주간 과제</h1>
-          <p style={{ fontSize:12, color:"#6b7280", marginTop:4 }}>이예진 · 삶다수 · 7학년 &nbsp;|&nbsp; 매주 수요일 PM 7:30 제출</p>
+          <p style={{ fontSize:12, color:"#6b7280", marginTop:4 }}>이예진 · 삶다수 · 7학년 &nbsp;|&nbsp; 매주 수요일 PM 7:30 제출 &nbsp;|&nbsp; ✍️ 말씀 암송, 예습도 잊지 말기!</p>
         </div>
         <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:20 }}>
           {TABS.map(t=>(
