@@ -12,29 +12,48 @@
     body { margin: 0; font-family: 'Apple SD Gothic Neo', sans-serif; background: #f3f4f6; }
     #print-root { display: none; }
 
+    /* ── 위클리 스타일 ── */
+    .wk-wrap { background: #fff; border-radius: 12px; overflow-x: auto; }
+    .wk-page { min-width: 700px; padding: 14px; font-size: 9px; }
+    .wk-title { font-size: 14px; font-weight: 800; text-align: center; border: 2px solid #000; padding: 5px; margin-bottom: 6px; }
+    .wk-meta { font-size: 10px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .wk-meta input { border: none; border-bottom: 1px solid #000; font-size: 10px; font-family: inherit; outline: none; background: transparent; }
+    .wk table { width: 100%; border-collapse: collapse; }
+    .wk td, .wk th { border: 1px solid #000; padding: 2px 3px; font-size: 8px; vertical-align: top; }
+    .wk th { background: #d9d9d9; font-weight: 700; text-align: center; }
+    .time-cell { background: #f0f0f0; font-size: 7px; text-align: center; white-space: nowrap; padding: 1px 2px; width: 22px; }
+    .plan-cell { position: relative; cursor: crosshair; user-select: none; width: 26px; height: 14px; min-height: 14px; }
+    .plan-cell.blocked-plan { background: #bfdbfe; }
+    .plan-cell.blocked-real { background: #fde68a; }
+    .plan-cell.drag-preview-plan { background: #93c5fd !important; opacity: 0.7; }
+    .plan-cell.drag-preview-real { background: #fcd34d !important; opacity: 0.7; }
+    .block-text { position: absolute; inset: 0; font-size: 7px; color: #1e3a8a; font-weight: 600; overflow: hidden; padding: 1px 2px; line-height: 1.2; pointer-events: none; word-break: keep-all; text-align: center; display: flex; align-items: center; justify-content: center; }
+    .block-text.real-text { color: #78350f; }
+    .wk-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 200; display: flex; align-items: center; justify-content: center; }
+    .wk-popup { background: #fff; border-radius: 10px; padding: 16px; width: 240px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+    .wk-popup h4 { font-size: 12px; font-weight: 700; color: #1e1b4b; margin-bottom: 8px; }
+    .wk-popup textarea { width: 100%; height: 64px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 11px; padding: 6px; resize: none; font-family: inherit; outline: none; }
+    .wk-popup .btns { display: flex; gap: 6px; margin-top: 10px; justify-content: flex-end; }
+    .wk-popup button { border: none; border-radius: 6px; padding: 5px 12px; font-size: 11px; cursor: pointer; font-weight: 600; }
+    .btn-save { background: #4f46e5; color: #fff; }
+    .btn-del { background: #fee2e2; color: #b91c1c; }
+    .btn-cancel { background: #e5e7eb; color: #374151; }
+    .wk-tall-input { width: 100%; min-height: 50px; border: none; outline: none; font-size: 8px; font-family: inherit; resize: none; background: transparent; padding: 2px; display: block; overflow: hidden; }
+    .wk-review-input { width: 100%; min-height: 35px; border: none; outline: none; font-size: 8px; font-family: inherit; resize: none; background: transparent; padding: 2px; }
+    .wk-short-input { width: 100%; border: none; outline: none; font-size: 8px; font-family: inherit; background: transparent; padding: 1px 2px; }
+
     @media print {
-      @page { margin: 15mm; size: A4; }
+      @page { margin: 8mm; size: A4; }
       body > #root { display: none; }
       #print-root { display: block; font-family: 'Apple SD Gothic Neo', sans-serif; }
-
-      /* 헤더/푸터 제거 */
       html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
       .pa table { width: 100%; border-collapse: collapse; table-layout: fixed; }
       .pa td, .pa th { border: 1px solid #000; padding: 4px 6px; font-size: 11px; vertical-align: top; word-break: keep-all; }
       .pa th { background: #d9d9d9; font-weight: 700; text-align: center; }
-
-      /* 공통 */
       .pa .doc-title { font-size: 14px; font-weight: 800; text-align: center; border: 2px solid #000; padding: 5px; margin-bottom: 8px; }
-      .pa .meta-row { display: flex; border: 1px solid #000; margin-bottom: 8px; font-size: 11px; }
-      .pa .meta-cell { flex: 1; padding: 3px 6px; border-right: 1px solid #000; }
-      .pa .meta-cell:last-child { border-right: none; }
-      .pa .meta-label { font-size: 9px; color: #555; }
-      .pa .content-area { white-space: pre-wrap; height: 60px; line-height: 1.6; font-size: 11px; overflow: visible; }
+      .pa .content-area { white-space: pre-wrap; height: 60px; line-height: 1.6; font-size: 11px; }
       .pa .content-area.tall { height: 90px; }
       .pa .content-area.xtall { height: 130px; }
-      .pa .content-area.fixed-sm { height: 40px; }
-      /* 큐티 각 행 고정 높이 */
       .pa tr.row-obs td, .pa tr.row-obs th { height: 80px; }
       .pa tr.row-sum td, .pa tr.row-sum th { height: 80px; }
       .pa tr.row-interp td, .pa tr.row-interp th { height: 100px; }
@@ -42,31 +61,38 @@
       .pa tr.row-feel td, .pa tr.row-feel th { height: 80px; }
       .pa tr.row-apply td, .pa tr.row-apply th { height: 100px; }
       .pa tr.row-review td, .pa tr.row-review th { height: 100px; }
-      .pa .row-label { background: #d9d9d9; font-weight: 700; font-size: 10px; text-align: center; width: 70px; vertical-align: middle; }
-      .pa .sub-label { font-size: 9px; color: #444; font-weight: 400; }
-      .pa .note { font-size: 9px; color: #555; font-style: italic; }
+
+      /* 위클리 인쇄 */
+      .wk-wrap, .wk-page { display: block !important; }
+      .plan-cell.blocked-plan { background: #bfdbfe !important; }
+      .plan-cell.blocked-real { background: #fde68a !important; }
+      .wk-overlay { display: none !important; }
+      .wk-print-btn { display: none !important; }
     }
   </style>
 </head>
 <body>
 <div id="print-root"></div>
 <div id="root"></div>
+
 <script type="text/babel">
-const { useState } = React;
+const { useState, useEffect, useRef } = React;
 const ME = { name: "이예진", group: "삶다수", grade: "7" };
+
 const TABS = [
-  { id: "sermon_main", label: "대예배 설교노트" },
+  { id: "sermon_main",    label: "대예배 설교노트" },
   { id: "sermon_college", label: "대학부 설교노트" },
-  { id: "qt1", label: "큐티 1" },
-  { id: "qt2", label: "큐티 2" },
-  { id: "prayer", label: "기도일지" },
-  { id: "weekly", label: "위클리" },
+  { id: "qt1",            label: "큐티 1" },
+  { id: "qt2",            label: "큐티 2" },
+  { id: "prayer",         label: "기도일지" },
+  { id: "weekly",         label: "위클리" },
 ];
+
 const esc = s => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const inS = { width:"100%", padding:"8px 10px", border:"1px solid #d1d5db", borderRadius:6, fontSize:13, fontFamily:"inherit", boxSizing:"border-box" };
 const taS = { ...inS, resize:"vertical" };
 
-const doPrint = (html) => {
+const doPrint = html => {
   const root = document.getElementById('print-root');
   root.innerHTML = `<div class="pa">${html}</div>`;
   window.print();
@@ -78,8 +104,7 @@ const Field = ({ label, value, onChange, multiline, placeholder, rows=3 }) => (
     <label style={{ display:"block", fontWeight:600, fontSize:13, color:"#374151", marginBottom:4 }}>{label}</label>
     {multiline
       ? <textarea value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder||""} rows={rows} style={taS} />
-      : <input type="text" value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder||""} style={inS} />
-    }
+      : <input type="text" value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder||""} style={inS} />}
   </div>
 );
 
@@ -91,22 +116,23 @@ const PrintBtn = ({ onClick }) => (
   </div>
 );
 
-// ── 설교노트 ──
+/* ══════════════════════════════
+   설교노트
+══════════════════════════════ */
 const SermonForm = ({ data, setData, label }) => {
   const getHTML = () => `
     <div class="doc-title">대학 7부 갈렙 설교 노트</div>
-    <div style="display:flex; border:1px solid #000; margin-bottom:8px; font-size:11px;">
-      <div style="flex:1; padding:3px 6px; border-right:1px solid #000;"><div style="font-size:9px;color:#555">날짜</div>${esc(data.date)}</div>
-      <div style="flex:1; padding:3px 6px; border-right:1px solid #000;"><div style="font-size:9px;color:#555">구분</div>${esc(label)}</div>
-      <div style="flex:1; padding:3px 6px;"><div style="font-size:9px;color:#555">이름</div>${ME.name}</div>
+    <div style="display:flex;border:1px solid #000;margin-bottom:8px;font-size:11px;">
+      <div style="flex:1;padding:3px 6px;border-right:1px solid #000;"><div style="font-size:9px;color:#555">날짜</div>${esc(data.date)}</div>
+      <div style="flex:1;padding:3px 6px;border-right:1px solid #000;"><div style="font-size:9px;color:#555">구분</div>${esc(label)}</div>
+      <div style="flex:1;padding:3px 6px;"><div style="font-size:9px;color:#555">이름</div>${ME.name}</div>
     </div>
     <table>
-      <tr><th style="width:70px;background:#d9d9d9">설교제목</th><td class="content-area">${esc(data.title)}</td></tr>
-      <tr><th style="background:#d9d9d9">설교<br/>요약</th><td class="content-area xtall">${esc(data.summary)}</td></tr>
-      <tr><th style="background:#d9d9d9">느낀점<br/><span style="font-size:9px;font-weight:400">(은혜나눔)</span></th><td class="content-area xtall">${esc(data.feeling)}</td></tr>
-      <tr><th style="background:#d9d9d9">적용</th><td class="content-area xtall">${esc(data.apply)}</td></tr>
-    </table>
-  `;
+      <tr><th style="width:70px">설교제목</th><td class="content-area">${esc(data.title)}</td></tr>
+      <tr><th>설교<br/>요약</th><td class="content-area xtall">${esc(data.summary)}</td></tr>
+      <tr><th>느낀점<br/><span style="font-size:9px;font-weight:400">(은혜나눔)</span></th><td class="content-area xtall">${esc(data.feeling)}</td></tr>
+      <tr><th>적용</th><td class="content-area xtall">${esc(data.apply)}</td></tr>
+    </table>`;
   return (
     <div>
       <Field label="날짜" value={data.date} onChange={v=>setData(p=>({...p,date:v}))} placeholder="예) 2025.03.09" />
@@ -119,11 +145,13 @@ const SermonForm = ({ data, setData, label }) => {
   );
 };
 
-// ── 큐티 (원본 2단 레이아웃) ──
+/* ══════════════════════════════
+   큐티
+══════════════════════════════ */
 const QTForm = ({ data, setData }) => {
   const getHTML = () => `
     <div class="doc-title">큐티 묵상 Homework</div>
-    <div style="display:flex; border:1px solid #000; margin-bottom:8px; font-size:11px;">
+    <div style="display:flex;border:1px solid #000;margin-bottom:8px;font-size:11px;">
       <div style="flex:1;padding:3px 6px;border-right:1px solid #000;"><div style="font-size:9px;color:#555">날짜 :</div>${esc(data.date)}</div>
       <div style="flex:1;padding:3px 6px;border-right:1px solid #000;"><div style="font-size:9px;color:#555">본문 :</div>${esc(data.book)}</div>
       <div style="flex:1;padding:3px 6px;border-right:1px solid #000;"><div style="font-size:9px;color:#555">반 :</div>${ME.group}</div>
@@ -134,17 +162,13 @@ const QTForm = ({ data, setData }) => {
         <td rowspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;width:55px;vertical-align:middle">관찰</td>
         <td style="background:#d9d9d9;font-weight:700;font-size:10px;width:80px;vertical-align:top">문체<br/>구분 및 정리</td>
         <td style="white-space:pre-wrap;vertical-align:top;font-size:11px;padding:4px 6px">${esc(data.observation)}</td>
-        <td style="background:#d9d9d9;font-weight:700;font-size:10px;width:70px;text-align:center;vertical-align:top">
-          하나님과<br/>관련된<br/>기록<br/><span style="font-size:8px;font-weight:400">(행적 or<br/>하신말씀<br/>or 은혜)</span>
-        </td>
+        <td style="background:#d9d9d9;font-weight:700;font-size:10px;width:70px;text-align:center;vertical-align:top">하나님과<br/>관련된<br/>기록<br/><span style="font-size:8px;font-weight:400">(행적 or<br/>하신말씀<br/>or 은혜)</span></td>
         <td style="white-space:pre-wrap;vertical-align:top;font-size:11px;padding:4px 6px" rowspan="2">${esc(data.god)}</td>
       </tr>
       <tr class="row-sum">
         <td style="background:#d9d9d9;font-weight:700;font-size:10px;vertical-align:top">줄거리 요약<br/>or 반복/대조<br/>찾기 (강조)</td>
         <td style="white-space:pre-wrap;vertical-align:top;font-size:11px;padding:4px 6px">${esc(data.summary)}</td>
-        <td style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:top">
-          배경적<br/>관찰<br/><span style="font-size:8px;font-weight:400">(장소 &<br/>시간 &<br/>등장인물)</span>
-        </td>
+        <td style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:top">배경적<br/>관찰<br/><span style="font-size:8px;font-weight:400">(장소 &<br/>시간 &<br/>등장인물)</span></td>
       </tr>
       <tr class="row-interp">
         <td colspan="2" style="background:#d9d9d9;font-weight:700;font-size:10px;text-align:center;vertical-align:top;padding-top:6px">해석</td>
@@ -175,8 +199,7 @@ const QTForm = ({ data, setData }) => {
           <div style="white-space:pre-wrap;font-size:11px">${esc(data.review)}</div>
         </td>
       </tr>
-    </table>
-  `;
+    </table>`;
   return (
     <div>
       <Field label="날짜" value={data.date} onChange={v=>setData(p=>({...p,date:v}))} />
@@ -195,42 +218,34 @@ const QTForm = ({ data, setData }) => {
   );
 };
 
-// ── 기도일지 (원본: 날짜/시간/장소/내용 4컬럼, 7행) ──
+/* ══════════════════════════════
+   기도일지
+══════════════════════════════ */
 const PrayerForm = ({ prayer, setPrayer }) => {
   const getHTML = () => `
     <div class="doc-title">제자훈련 코람데오 기도일지</div>
-    <div style="font-size:11px; margin-bottom:8px;">
+    <div style="font-size:11px;margin-bottom:8px;">
       제자반명 <u style="display:inline-block;min-width:80px">${ME.group}</u>
       &nbsp;&nbsp; 이름 <u style="display:inline-block;min-width:80px">${ME.name}</u>
       &nbsp;&nbsp; 학년 <u style="display:inline-block;min-width:40px">${ME.grade}</u>
     </div>
     <table>
       <tr>
-        <th style="width:55px;text-align:center">날짜</th>
-        <th style="width:80px;text-align:center">시간</th>
-        <th style="width:55px;text-align:center">장소</th>
-        <th style="text-align:center">내용</th>
+        <th style="width:55px">날짜</th><th style="width:80px">시간</th>
+        <th style="width:55px">장소</th><th>내용</th>
       </tr>
-      ${prayer.map(r => `
+      ${prayer.map(r=>`
         <tr>
           <td style="text-align:center;font-size:11px">${esc(r.date)}</td>
-          <td style="text-align:center;font-size:11px">
-            ${esc(r.startTime)}<br/>~<br/>${esc(r.endTime)}
-          </td>
+          <td style="text-align:center;font-size:11px">${esc(r.startTime)}<br/>~<br/>${esc(r.endTime)}</td>
           <td style="text-align:center;font-size:11px">${esc(r.place)}</td>
           <td style="white-space:pre-wrap;min-height:80px;font-size:11px">${esc(r.content)}</td>
-        </tr>
-      `).join('')}
-      ${Array(Math.max(0, 7 - prayer.length)).fill(`
-        <tr>
-          <td style="height:80px"></td><td></td><td></td><td></td>
-        </tr>
-      `).join('')}
-    </table>
-  `;
+        </tr>`).join('')}
+      ${Array(Math.max(0,7-prayer.length)).fill('<tr><td style="height:80px"></td><td></td><td></td><td></td></tr>').join('')}
+    </table>`;
   return (
     <div>
-      {prayer.map((row,i) => (
+      {prayer.map((row,i)=>(
         <div key={i} style={{ background:"#f9fafb", borderRadius:8, padding:14, marginBottom:12, border:"1px solid #e5e7eb" }}>
           <div style={{ fontWeight:700, fontSize:13, color:"#6b7280", marginBottom:10 }}>기도 {i+1}</div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:8 }}>
@@ -252,107 +267,380 @@ const PrayerForm = ({ prayer, setPrayer }) => {
   );
 };
 
-// ── 위클리 ──
-const WeeklyForm = ({ weekly, setWeekly }) => {
-  const HOURS = ['AM 4','5','6','7','8','9','10','11','PM 12','1','2','3','4','5','6','7','8','9','10','11','AM 12','1','2','3'];
-  const DAYS = ['일','월','화','수','목','금','토'];
-  const getHTML = () => `
-    <div class="doc-title">Weekly Check List</div>
-    <div style="font-size:11px;border:1px solid #000;padding:3px 6px;margin-bottom:6px;">
-      이름 : ${ME.name} &nbsp;&nbsp;&nbsp; 기간 : ${esc(weekly.week)}
-    </div>
-    <table style="margin-bottom:6px;font-size:9px;">
-      <tr>
-        <th style="background:#d9d9d9;width:28px;text-align:center" rowspan="2">시간</th>
-        ${DAYS.map(d=>`<th style="background:#d9d9d9;text-align:center" colspan="2">${d}</th>`).join('')}
-        <th style="background:#d9d9d9;text-align:center;width:80px" rowspan="${HOURS.length + 2}">금주의 목표<br/>(우선순위)<br/><br/><span style="font-weight:400;white-space:pre-wrap">${esc(weekly.goals)}</span></th>
-      </tr>
-      <tr>
-        ${DAYS.map(()=>`<th style="background:#efefef;text-align:center;font-size:8px;font-weight:400">계획</th><th style="background:#efefef;text-align:center;font-size:8px;font-weight:400">실제</th>`).join('')}
-      </tr>
-      ${HOURS.map(h=>`
-        <tr>
-          <td style="background:#f5f5f5;text-align:center;font-size:8px;white-space:nowrap">${h}</td>
-          ${DAYS.map(()=>`<td style="height:14px"></td><td style="height:14px;background:#fafafa"></td>`).join('')}
-        </tr>
-      `).join('')}
-    </table>
-    <table style="margin-bottom:6px;">
-      <tr>
-        <th style="background:#d9d9d9;text-align:center;width:60px">잘한 것</th>
-        <td class="content-area">${esc(weekly.good)}</td>
-        <th style="background:#d9d9d9;text-align:center;width:70px">잘하지<br/>못한 것</th>
-        <td class="content-area">${esc(weekly.bad)}</td>
-        <th style="background:#d9d9d9;text-align:center;width:70px">개선해야<br/>할 것</th>
-        <td class="content-area">${esc(weekly.improve)}</td>
-      </tr>
-    </table>
-    <table>
-      <tr>
-        <th style="background:#d9d9d9;text-align:center;width:60px">전도 보고<br/>및 느낀 점</th>
-        <td class="content-area">${esc(weekly.evangelism)}</td>
-      </tr>
-    </table>
-  `;
+/* ══════════════════════════════
+   위클리 (드래그 블로킹)
+══════════════════════════════ */
+const HOURS = ['AM 4','5','6','7','8','9','10','11','PM 12','1','2','3','4','5','6','7','8','9','10','11','AM 12','1','2','3'];
+const WDAYS = [
+  {key:'wed',label:'수'},{key:'thu',label:'목'},{key:'fri',label:'금'},
+  {key:'sat',label:'토'},{key:'sun',label:'일'},{key:'mon',label:'월'},{key:'tue',label:'화'},
+];
+const TYPES = ['plan','real'];
+
+const WeeklyForm = () => {
+  const [blocks, setBlocks] = useState(() => {
+    const b = {};
+    WDAYS.forEach(d => { b[d.key] = { plan:{}, real:{} }; });
+    return b;
+  });
+  const [drag, setDrag]     = useState(null); // {day,type,start,end}
+  const [popup, setPopup]   = useState(null); // {day,type,start,end}
+  const [popText, setPopText] = useState('');
+  const popRef = useRef();
+
+  // 연속 블록 범위 탐색
+  const findRange = (day, type, hi) => {
+    const b = blocks[day][type];
+    let s = hi, e = hi;
+    while (s > 0 && b[s-1] !== undefined) s--;
+    while (e < HOURS.length-1 && b[e+1] !== undefined) e++;
+    return [s, e];
+  };
+
+  const applyBlocks = (day, type, s, e, text) => {
+    setBlocks(prev => {
+      const next = JSON.parse(JSON.stringify(prev));
+      for (let i = s; i <= e; i++) next[day][type][i] = text;
+      return next;
+    });
+  };
+
+  const removeBlocks = (day, type, s, e) => {
+    setBlocks(prev => {
+      const next = JSON.parse(JSON.stringify(prev));
+      for (let i = s; i <= e; i++) delete next[day][type][i];
+      return next;
+    });
+  };
+
+  const openPopup = (day, type, s, e, existing='') => {
+    setPopup({day, type, start:s, end:e});
+    setPopText(existing);
+    setTimeout(() => popRef.current && popRef.current.focus(), 50);
+  };
+
+  const savePopup = () => {
+    if (!popup) return;
+    applyBlocks(popup.day, popup.type, popup.start, popup.end, popText);
+    setPopup(null);
+  };
+
+  const deletePopup = () => {
+    if (!popup) return;
+    removeBlocks(popup.day, popup.type, popup.start, popup.end);
+    setPopup(null);
+  };
+
+  const onMouseDown = (day, type, hi, e) => {
+    e.preventDefault();
+    const b = blocks[day][type];
+    if (b[hi] !== undefined) {
+      const [s, end] = findRange(day, type, hi);
+      openPopup(day, type, s, end, b[s] || '');
+      return;
+    }
+    setDrag({day, type, start:hi, end:hi});
+  };
+
+  const onMouseOver = (day, type, hi) => {
+    if (!drag || drag.day !== day || drag.type !== type) return;
+    setDrag(prev => ({...prev, end:hi}));
+  };
+
+  const onMouseUp = () => {
+    if (!drag) return;
+    const s = Math.min(drag.start, drag.end);
+    const e = Math.max(drag.start, drag.end);
+    applyBlocks(drag.day, drag.type, s, e, '');
+    openPopup(drag.day, drag.type, s, e, '');
+    setDrag(null);
+  };
+
+  // 드래그 프리뷰 범위
+  const isDragPreview = (day, type, hi) => {
+    if (!drag || drag.day !== day || drag.type !== type) return false;
+    const s = Math.min(drag.start, drag.end);
+    const e = Math.max(drag.start, drag.end);
+    return hi >= s && hi <= e && blocks[day][type][hi] === undefined;
+  };
+
+  const getCellClass = (day, type, hi) => {
+    let cls = 'plan-cell';
+    if (isDragPreview(day, type, hi)) cls += type==='plan' ? ' drag-preview-plan' : ' drag-preview-real';
+    else if (blocks[day][type][hi] !== undefined) cls += type==='plan' ? ' blocked-plan' : ' blocked-real';
+    return cls;
+  };
+
+  // 위클리 인쇄 — 현재 DOM 스냅샷
+  const printWeekly = () => {
+    const el = document.getElementById('weekly-print-area');
+    if (!el) return;
+    const root = document.getElementById('print-root');
+    root.innerHTML = el.innerHTML;
+    window.print();
+    root.innerHTML = '';
+  };
+
+  const dayLabel = {wed:'수',thu:'목',fri:'금',sat:'토',sun:'일',mon:'월',tue:'화'};
+
   return (
     <div>
-      <Field label="주차" value={weekly.week} onChange={v=>setWeekly(p=>({...p,week:v}))} placeholder="예) 2025.03.09 - 03.15" />
-      <Field label="금주의 목표 (우선순위)" value={weekly.goals} onChange={v=>setWeekly(p=>({...p,goals:v}))} multiline />
-      <Field label="잘한 것" value={weekly.good} onChange={v=>setWeekly(p=>({...p,good:v}))} multiline />
-      <Field label="잘하지 못한 것" value={weekly.bad} onChange={v=>setWeekly(p=>({...p,bad:v}))} multiline />
-      <Field label="개선해야 할 것" value={weekly.improve} onChange={v=>setWeekly(p=>({...p,improve:v}))} multiline />
-      <Field label="전도 보고 및 느낀 점" value={weekly.evangelism} onChange={v=>setWeekly(p=>({...p,evangelism:v}))} multiline />
-      <PrintBtn onClick={() => doPrint(getHTML())} />
+      {/* 인쇄용 숨김 영역 */}
+      <div id="weekly-print-area" style={{display:'none'}}>
+        <div className="doc-title" style={{fontFamily:'inherit',fontSize:14,fontWeight:800,textAlign:'center',border:'2px solid #000',padding:5,marginBottom:6}}>Weekly Check List</div>
+        <div style={{fontSize:10,marginBottom:6}}>이름 : <u>{ME.name}</u></div>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:8}}>
+          <thead>
+            <tr>
+              <th style={{border:'1px solid #000',background:'#d9d9d9',width:22}}>구분</th>
+              {WDAYS.map(d=><th key={d.key} colSpan={2} style={{border:'1px solid #000',background:'#d9d9d9',textAlign:'center'}}>{d.label}</th>)}
+              <th style={{border:'1px solid #000',background:'#d9d9d9',width:64}}>금주의 목표<br/>(우선순위)</th>
+            </tr>
+            <tr>
+              <th style={{border:'1px solid #000'}}></th>
+              {WDAYS.map(d=>[
+                <th key={d.key+'p'} style={{border:'1px solid #000',background:'#dbeafe',fontSize:7}}>계획</th>,
+                <th key={d.key+'r'} style={{border:'1px solid #000',background:'#fef9c3',fontSize:7}}>실제</th>
+              ])}
+              <th style={{border:'1px solid #000'}}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {HOURS.map((h,hi)=>(
+              <tr key={hi}>
+                <td style={{border:'1px solid #000',background:'#f0f0f0',fontSize:7,textAlign:'center',whiteSpace:'nowrap'}}>{h}</td>
+                {WDAYS.map(d=>TYPES.map(t=>{
+                  const txt = blocks[d.key][t][hi];
+                  return (
+                    <td key={d.key+t} style={{border:'1px solid #000',height:14,background:txt!==undefined?(t==='plan'?'#bfdbfe':'#fde68a'):'',fontSize:7,verticalAlign:'middle',textAlign:'center'}}>
+                      {txt||''}
+                    </td>
+                  );
+                }))}
+                {hi===0 && <td rowSpan={HOURS.length} style={{border:'1px solid #000',verticalAlign:'top',padding:3,fontSize:8}}>{document.getElementById('wk-goals')?.value||''}</td>}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:8,marginTop:-1}}>
+          <tr>
+            <td style={{border:'1px solid #000',background:'#d9d9d9',fontWeight:700,width:55,textAlign:'center'}}>잘한 것</td>
+            <td style={{border:'1px solid #000',minHeight:35}}>{document.getElementById('wk-good')?.value||''}</td>
+            <td style={{border:'1px solid #000',background:'#d9d9d9',fontWeight:700,width:60,textAlign:'center'}}>잘하지<br/>못한 것</td>
+            <td style={{border:'1px solid #000'}}>{document.getElementById('wk-bad')?.value||''}</td>
+            <td style={{border:'1px solid #000',background:'#d9d9d9',fontWeight:700,width:60,textAlign:'center'}}>개선해야<br/>할 것</td>
+            <td style={{border:'1px solid #000'}}>{document.getElementById('wk-improve')?.value||''}</td>
+          </tr>
+        </table>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:8,marginTop:-1}}>
+          <tr>
+            <th style={{border:'1px solid #000',background:'#d9d9d9',width:55}}>전도 보고<br/>및 느낀 점</th>
+            <td style={{border:'1px solid #000',minHeight:40}}>{document.getElementById('wk-ev')?.value||''}</td>
+            <th style={{border:'1px solid #000',background:'#d9d9d9',width:55}}>목사님께</th>
+            <td style={{border:'1px solid #000'}}>{document.getElementById('wk-pastor')?.value||''}</td>
+          </tr>
+        </table>
+      </div>
+
+      {/* 화면 UI */}
+      <div className="wk-wrap">
+        <div className="wk-page wk">
+          <div className="wk-title">Weekly Check List</div>
+          <div className="wk-meta">
+            이름 : <u style={{minWidth:60,display:'inline-block'}}>이예진</u>
+            <span style={{marginLeft:'auto'}}>
+              <input id="wk-year" className="" style={{width:30}} placeholder="2026" />년
+              <input style={{width:18}} placeholder="월" /> 월
+              <input style={{width:18}} placeholder="일" /> 일 -
+              <input style={{width:18}} placeholder="월" /> 월
+              <input style={{width:18}} placeholder="일" /> 일
+            </span>
+          </div>
+
+          <div onMouseLeave={() => drag && setDrag(null)} onMouseUp={onMouseUp}
+               style={{userSelect:'none'}}>
+            <table style={{tableLayout:'fixed'}}>
+              <thead>
+                <tr>
+                  <th style={{width:22}}>구분</th>
+                  {WDAYS.map(d=><th key={d.key} colSpan={2}>{d.label}( )</th>)}
+                  <th style={{width:64}}>금주의 목표<br/>(우선순위)</th>
+                </tr>
+                <tr>
+                  <th></th>
+                  {WDAYS.map(d=>[
+                    <th key={d.key+'p'} style={{fontSize:7,background:'#dbeafe'}}>계획</th>,
+                    <th key={d.key+'r'} style={{fontSize:7,background:'#fef9c3'}}>실제</th>
+                  ])}
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {HOURS.map((h,hi)=>(
+                  <tr key={hi}>
+                    <td className="time-cell">{h}</td>
+                    {WDAYS.map(d=>TYPES.map(t=>{
+                      const txt = blocks[d.key][t][hi];
+                      return (
+                        <td key={d.key+t}
+                            className={getCellClass(d.key, t, hi)}
+                            onMouseDown={e=>onMouseDown(d.key,t,hi,e)}
+                            onMouseOver={()=>onMouseOver(d.key,t,hi)}>
+                          {txt !== undefined && txt !== '' && (
+                            <div className={'block-text'+(t==='real'?' real-text':'')}>{txt}</div>
+                          )}
+                        </td>
+                      );
+                    }))}
+                    {hi===0 && (
+                      <td rowSpan={HOURS.length} style={{verticalAlign:'top',padding:3}}>
+                        <textarea id="wk-goals" className="wk-tall-input" style={{minHeight:HOURS.length*14+'px'}} placeholder="목표 입력" />
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 우선업무 */}
+          <table style={{marginTop:-1,tableLayout:'fixed'}}>
+            <tbody>
+              <tr>
+                <td rowSpan={3} style={{background:'#d9d9d9',fontWeight:700,fontSize:7,textAlign:'center',verticalAlign:'middle',width:22,writingMode:'vertical-rl'}}>우선업무<br/>/<br/>중요사항</td>
+                <td colSpan={14} style={{height:50,verticalAlign:'top',overflow:'hidden'}}><textarea className="wk-tall-input"></textarea></td>
+                <th style={{fontSize:7,textAlign:'left',verticalAlign:'top',padding:2,width:64}}>기도후원자와<br/>교제한 내용</th>
+              </tr>
+              <tr>
+                <td colSpan={14} style={{height:50,overflow:'hidden'}}></td>
+                <td rowSpan={2} style={{verticalAlign:'top',overflow:'hidden'}}><textarea className="wk-tall-input"></textarea></td>
+              </tr>
+              <tr><td colSpan={14} style={{height:50}}></td></tr>
+            </tbody>
+          </table>
+
+          {/* 전도 보고서 */}
+          <table style={{marginTop:-1,tableLayout:'fixed'}}>
+            <tbody>
+              <tr>
+                <th colSpan={4}>전도 보고서</th>
+                <th colSpan={2}>느낀 점 및 전도 피드백(기도제목)</th>
+                <th>목사님께</th>
+              </tr>
+              <tr>
+                <td style={{background:'#d9d9d9',fontWeight:700,fontSize:8,width:55}}>■ 누구에게:</td>
+                <td colSpan={3}><input className="wk-short-input" /></td>
+                <td colSpan={2} rowSpan={5} style={{verticalAlign:'top',overflow:'hidden'}}>
+                  <textarea id="wk-ev" className="wk-tall-input" style={{minHeight:80}}></textarea>
+                </td>
+                <td rowSpan={5} style={{verticalAlign:'top',overflow:'hidden'}}>
+                  <textarea id="wk-pastor" className="wk-tall-input" style={{minHeight:80}}></textarea>
+                </td>
+              </tr>
+              <tr>
+                <td style={{background:'#d9d9d9',fontWeight:700,fontSize:8}}>■ 언제:</td>
+                <td><input className="wk-short-input" /></td>
+                <td style={{background:'#d9d9d9',fontWeight:700,fontSize:8}}>■ 장소:</td>
+                <td><input className="wk-short-input" /></td>
+              </tr>
+              <tr>
+                <td style={{background:'#d9d9d9',fontWeight:700,fontSize:8}}>■ 전도내용:<br/><span style={{fontWeight:400}}>(노방,우정)</span></td>
+                <td colSpan={3}><textarea className="wk-review-input"></textarea></td>
+              </tr>
+              <tr>
+                <td style={{background:'#d9d9d9',fontWeight:700,fontSize:8}}>■ 반응/결과:</td>
+                <td colSpan={3}><textarea className="wk-review-input"></textarea></td>
+              </tr>
+              <tr>
+                <td style={{background:'#d9d9d9',fontWeight:700,fontSize:8}}>■ 장소:</td>
+                <td colSpan={3}></td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* 한 주를 돌아보며 */}
+          <table style={{marginTop:-1}}>
+            <tbody>
+              <tr><th colSpan={6} style={{textAlign:'left',padding:'2px 6px'}}>한 주를 돌아보며</th></tr>
+              <tr>
+                <td style={{background:'#d9d9d9',fontWeight:700,fontSize:8,width:55}}>1. 잘한 것</td>
+                <td><textarea id="wk-good" className="wk-review-input"></textarea></td>
+                <td style={{background:'#d9d9d9',fontWeight:700,fontSize:8,width:60}}>2. 잘하지<br/>못한 것</td>
+                <td><textarea id="wk-bad" className="wk-review-input"></textarea></td>
+                <td style={{background:'#d9d9d9',fontWeight:700,fontSize:8,width:60}}>3. 개선해야<br/>할 것</td>
+                <td><textarea id="wk-improve" className="wk-review-input"></textarea></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style={{marginTop:16,textAlign:'center'}}>
+            <button className="wk-print-btn" onClick={printWeekly}
+              style={{background:'#4f46e5',color:'#fff',border:'none',borderRadius:8,padding:'11px 28px',fontSize:14,fontWeight:700,cursor:'pointer',boxShadow:'0 2px 8px rgba(79,70,229,0.3)'}}>
+              🖨️ 이 양식 인쇄
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 드래그 팝업 */}
+      {popup && (
+        <div className="wk-overlay" onClick={e=>e.target===e.currentTarget&&setPopup(null)}>
+          <div className="wk-popup">
+            <h4>{dayLabel[popup.day]}요일 {popup.type==='plan'?'계획':'실제'} | {HOURS[popup.start]}{popup.start!==popup.end?' ~ '+HOURS[popup.end]:''}</h4>
+            <textarea ref={popRef} value={popText} onChange={e=>setPopText(e.target.value)}
+              placeholder="일정을 입력하세요 (Enter=저장)"
+              onKeyDown={e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();savePopup();} if(e.key==='Escape')setPopup(null); }} />
+            <div className="btns">
+              <button className="btn-del" onClick={deletePopup}>삭제</button>
+              <button className="btn-cancel" onClick={()=>setPopup(null)}>취소</button>
+              <button className="btn-save" onClick={savePopup}>저장</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-// ── 암송/예습 ──
-const MemoForm = ({ memo, setMemo }) => (
-  <div>
-    <div style={{ background:"#fef9c3", border:"1px solid #fde68a", borderRadius:8, padding:12, marginBottom:16, fontSize:13, color:"#92400e" }}>
-      💡 말씀 암송은 <strong>사랑의교회 앱</strong>에서, 제자반 예습은 <strong>교재</strong>에서 직접 진행. 여기선 메모만!
-    </div>
-    <Field label="말씀 암송 — 이번 주 구절 메모" value={memo.memorization} onChange={v=>setMemo(p=>({...p,memorization:v}))} multiline placeholder="암송할 3구절" />
-    <Field label="제자반 예습 — 진행 현황 / 메모" value={memo.preview} onChange={v=>setMemo(p=>({...p,preview:v}))} multiline placeholder="예습 메모" />
-  </div>
-);
-
+/* ══════════════════════════════
+   앱 루트
+══════════════════════════════ */
 function App() {
-  const [tab, setTab] = useState("sermon_main");
-  const [sermonMain, setSermonMain] = useState({ date:"", title:"", summary:"", feeling:"", apply:"" });
-  const [sermonCollege, setSermonCollege] = useState({ date:"", title:"", summary:"", feeling:"", apply:"" });
-  const [qt1, setQt1] = useState({ date:"", book:"", observation:"", summary:"", god:"", background:"", questions:"", message:"", feeling:"", apply:"", review:"" });
-  const [qt2, setQt2] = useState({ date:"", book:"", observation:"", summary:"", god:"", background:"", questions:"", message:"", feeling:"", apply:"", review:"" });
-  const [prayer, setPrayer] = useState([{ date:"", startTime:"", endTime:"", place:"", content:"" }]);
-  const [weekly, setWeekly] = useState({ week:"", goals:"", good:"", bad:"", improve:"", evangelism:"" });
-  const [memo, setMemo] = useState({ memorization:"", preview:"" });
+  const [tab, setTab]               = useState("sermon_main");
+  const [sermonMain, setSermonMain] = useState({date:"",title:"",summary:"",feeling:"",apply:""});
+  const [sermonCollege, setSermonCollege] = useState({date:"",title:"",summary:"",feeling:"",apply:""});
+  const [qt1, setQt1] = useState({date:"",book:"",observation:"",summary:"",god:"",background:"",questions:"",message:"",feeling:"",apply:"",review:""});
+  const [qt2, setQt2] = useState({date:"",book:"",observation:"",summary:"",god:"",background:"",questions:"",message:"",feeling:"",apply:"",review:""});
+  const [prayer, setPrayer] = useState([{date:"",startTime:"",endTime:"",place:"",content:""}]);
 
   const renderTab = () => {
-    if (tab==="sermon_main") return <SermonForm data={sermonMain} setData={setSermonMain} label="주일대예배" />;
+    if (tab==="sermon_main")    return <SermonForm data={sermonMain} setData={setSermonMain} label="주일대예배" />;
     if (tab==="sermon_college") return <SermonForm data={sermonCollege} setData={setSermonCollege} label="대학부예배" />;
-    if (tab==="qt1") return <QTForm data={qt1} setData={setQt1} />;
-    if (tab==="qt2") return <QTForm data={qt2} setData={setQt2} />;
+    if (tab==="qt1")    return <QTForm data={qt1} setData={setQt1} />;
+    if (tab==="qt2")    return <QTForm data={qt2} setData={setQt2} />;
     if (tab==="prayer") return <PrayerForm prayer={prayer} setPrayer={setPrayer} />;
-    if (tab==="weekly") return <WeeklyForm weekly={weekly} setWeekly={setWeekly} />;
-
+    if (tab==="weekly") return <WeeklyForm />;
   };
 
   return (
-    <div style={{ minHeight:"100vh", background:"#f3f4f6" }}>
-      <div style={{ maxWidth:720, margin:"0 auto", padding:"24px 16px" }}>
-        <div style={{ marginBottom:20, textAlign:"center" }}>
-          <h1 style={{ fontSize:20, fontWeight:800, color:"#1e1b4b", margin:0 }}>제자훈련 주간 과제</h1>
-          <p style={{ fontSize:12, color:"#6b7280", marginTop:4 }}>이예진 · 삶다수 · 7학년 &nbsp;|&nbsp; 매주 수요일 PM 7:30 제출 &nbsp;|&nbsp; ✍️ 말씀 암송, 예습도 잊지 말기!</p>
+    <div style={{minHeight:"100vh",background:"#f3f4f6"}}>
+      <div style={{maxWidth:760,margin:"0 auto",padding:"24px 16px"}}>
+        <div style={{marginBottom:20,textAlign:"center"}}>
+          <h1 style={{fontSize:20,fontWeight:800,color:"#1e1b4b",margin:0}}>제자훈련 주간 과제</h1>
+          <p style={{fontSize:12,color:"#6b7280",marginTop:4}}>이예진 · 삶다수 · 7학년 &nbsp;|&nbsp; 매주 수요일 PM 7:30 제출 &nbsp;|&nbsp; ✍️ 말씀 암송, 예습도 잊지 말기!</p>
         </div>
-        <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:20 }}>
+        <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:20}}>
           {TABS.map(t=>(
-            <button key={t.id} onClick={()=>setTab(t.id)} style={{ fontSize:12, padding:"6px 12px", borderRadius:20, border:"none", cursor:"pointer", background:tab===t.id?"#4f46e5":"#e5e7eb", color:tab===t.id?"#fff":"#374151", fontWeight:tab===t.id?700:400 }}>
+            <button key={t.id} onClick={()=>setTab(t.id)}
+              style={{fontSize:12,padding:"6px 12px",borderRadius:20,border:"none",cursor:"pointer",
+                      background:tab===t.id?"#4f46e5":"#e5e7eb",
+                      color:tab===t.id?"#fff":"#374151",
+                      fontWeight:tab===t.id?700:400}}>
               {t.label}
             </button>
           ))}
         </div>
-        <div style={{ background:"#fff", borderRadius:12, padding:20, boxShadow:"0 1px 4px rgba(0,0,0,0.08)" }}>
+        <div style={{background: tab==="weekly"?"transparent":"#fff", borderRadius:12, padding: tab==="weekly"?0:20, boxShadow: tab==="weekly"?"none":"0 1px 4px rgba(0,0,0,0.08)"}}>
           {renderTab()}
         </div>
       </div>
